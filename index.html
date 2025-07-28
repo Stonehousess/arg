@@ -158,6 +158,7 @@
   z-index: 1000;
   display: none;
   flex-wrap: wrap; /* Optional: allows wrapping on small screens */
+  opacity: 0.9;
 }
 
 #playbackToolbar button {
@@ -319,7 +320,7 @@ input[type="text"] {
 </style>
 </head>
 <body>
-<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="location.reload()">🔁</button>
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><button onclick="location.reload()">🔁</button>
 <div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
@@ -639,10 +640,25 @@ function testImageUpload() {
       ctx.translate(width / 2, height / 2);
       ctx.rotate((backgroundRotation * Math.PI) / 180);
       // Calculate dimensions to cover the entire screen after rotation
-      const maxDimension = Math.max(width, height);
-      const scale = maxDimension / Math.min(backgroundImage.width, backgroundImage.height);
-      const scaledWidth = backgroundImage.width * scale;
-      const scaledHeight = backgroundImage.height * scale;
+      const windowAspect = width / height;
+      const imageAspect = backgroundImage.width / backgroundImage.height;
+      
+      let scaleX, scaleY;
+      if (windowAspect > imageAspect) {
+        // Window is wider than image - scale to height
+        scaleY = height / backgroundImage.height;
+        scaleX = scaleY;
+      } else {
+        // Window is taller than image - scale to width
+        scaleX = width / backgroundImage.width;
+        scaleY = scaleX;
+      }
+      
+      // Ensure we cover the entire screen
+      const finalScale = Math.max(scaleX, scaleY);
+      const scaledWidth = backgroundImage.width * finalScale;
+      const scaledHeight = backgroundImage.height * finalScale;
+      
       ctx.drawImage(backgroundImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
       ctx.restore();
     } else {
@@ -2408,6 +2424,12 @@ document.getElementById('playbackSlider').addEventListener('input', (e) => {
 function rotateBackground() {
   backgroundRotation = (backgroundRotation + 90) % 360;
   console.log("🔄 Background rotated to:", backgroundRotation + "°");
+}
+
+function rollDice() {
+  const result = Math.floor(Math.random() * 6) + 1;
+  alert(`🎲 You rolled a ${result}!`);
+  console.log("🎲 Dice roll result:", result);
 }
 function togglePlaybackToolbar() {
   const toolbar = document.getElementById('bottomToolbar');
