@@ -387,8 +387,20 @@ input[type="text"] {
 </style>
 </head>
 <body>
-<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button><button onclick="cycleBackground()" style="margin-left:10px;">🔄IMG🖼️</button>
-<div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong></div>
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button><button onclick="cycleBackground()" style="margin-left:10px;">🖼️</button>
+<div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong> <label style="margin-left: 10px;">🎨 Style:
+        <select id="themeSelector" onchange="switchTheme(this.value)">
+<option value="default">Start 😀</option>
+<option value="argyle">Argyle ♻️</option>
+<option value="cqc">Games 🎮</option>
+<option value="blank">Blank 😶</option>
+<option value="meme">Memes 🙄</option>
+<option value="recipes">Food 😋</option>
+<option value="season">🏟️S25⚽️</option>
+<option value="sleep">🥱 😴</option>
+<option value="credits"> 💚</option>
+</select>
+</label></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
 <button onclick="document.getElementById('fileLoader').click()">🆙 Load.json</button>
@@ -405,20 +417,6 @@ input[type="text"] {
 <label style="margin-left: 10px;">Video Link:
         <input id="youtubeLink" placeholder="Paste Video URL" style="width:50px;" type="text"/>
 <button onclick="loadYouTubeVideo()">Load</button>
-</label>
-
-<label style="margin-left: 10px;">🎨 Style:
-        <select id="themeSelector" onchange="switchTheme(this.value)">
-<option value="default">Start 😀</option>
-<option value="argyle">Argyle ♻️</option>
-<option value="cqc">Games 🎮</option>
-<option value="blank">Blank 😶</option>
-<option value="meme">Memes 🙄</option>
-<option value="recipes">Food 😋</option>
-<option value="season">🏟️S25⚽️</option>
-<option value="sleep">🥱 😴</option>
-<option value="credits"> 💚</option>
-</select>
 </label>
 <button onclick="rotateBackground()">🔄</button>
 <button onclick="deleteAllIdeas()" style="margin-left:10px;">🚮Delete💭Ideas🗑️</button>
@@ -2529,27 +2527,40 @@ function toggleMusicPanel() {
 function loadMusicList() {
   const musicList = document.getElementById('musicList');
   
-  // Sample MP3 files - you can replace these with actual files from your mp3 folder
+  // Get actual MP3 files from the mp3 folder
   const musicFiles = [
-    'song1.mp3',
-    'song2.mp3', 
-    'song3.mp3',
-    'background_music.mp3',
-    'ambient_sounds.mp3',
-    'chill_beats.mp3',
-    'upbeat_track.mp3',
-    'relaxing_melody.mp3'
+    'mp3/Test.mp3'
   ];
+  
+  // Try to detect additional MP3 files in the mp3 folder
+  // This is a fallback list - you can add more files here
+  const additionalFiles = [
+    'mp3/background.mp3',
+    'mp3/ambient.mp3',
+    'mp3/chill.mp3',
+    'mp3/upbeat.mp3'
+  ];
+  
+  // Combine the lists
+  const allMusicFiles = [...musicFiles, ...additionalFiles];
   
   musicList.innerHTML = '';
   
-  musicFiles.forEach(file => {
+  allMusicFiles.forEach(file => {
     const musicItem = document.createElement('div');
     musicItem.className = 'music-item';
-    musicItem.textContent = file;
+    musicItem.textContent = file.split('/').pop(); // Show just filename
     musicItem.onclick = () => playMusic(file);
     musicList.appendChild(musicItem);
   });
+  
+  // Add a note about adding more files
+  if (allMusicFiles.length === 1) {
+    const noteItem = document.createElement('div');
+    noteItem.style.cssText = 'color: #888; font-style: italic; text-align: center; padding: 10px; font-size: 12px;';
+    noteItem.textContent = 'Add more MP3 files to the mp3/ folder to see them here';
+    musicList.appendChild(noteItem);
+  }
 }
 
 function playMusic(filename) {
@@ -2562,8 +2573,25 @@ function playMusic(filename) {
   event.target.classList.add('playing');
   
   console.log(`🎵 Playing: ${filename}`);
-  // Here you would implement actual audio playback
-  // For now, just log the selection
+  
+  // Create audio element and play
+  const audio = new Audio(filename);
+  audio.volume = 0.5; // Set volume to 50%
+  
+  // Stop any currently playing audio
+  if (window.currentAudio) {
+    window.currentAudio.pause();
+    window.currentAudio = null;
+  }
+  
+  window.currentAudio = audio;
+  
+  audio.play().then(() => {
+    console.log(`🎵 Successfully started playing: ${filename}`);
+  }).catch(err => {
+    console.error(`❌ Error playing audio: ${err}`);
+    event.target.classList.remove('playing');
+  });
 }
 function togglePlaybackToolbar() {
   const toolbar = document.getElementById('bottomToolbar');
@@ -2731,12 +2759,25 @@ document.getElementById('uploadImage').addEventListener('change', function (e) {
 });
 </script>
 </label></div>
-<div id="playbackToolbar" style="position: fixed; bottom: 0; width: 100%; background: #111; color: white;display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px; z-index: 1000; display: none;"><button onclick="recordState('start')">🎬Mark-Start</button><button onclick="recordState('end')">Mark-Fin🏁</button><button onclick="startPlayback()">▶️Play</button><input id="playbackSlider" max="1" min="0" step="0.01" style="margin-left: 10px; width: 200px;" type="range" value="0"/><select id="playbackDuration" style="margin-left: 10px;">
-<option value="5000">5s</option>
-<option selected="" value="10000">10s</option>
-<option value="15000">15s</option>
-<option value="20000">20s</option>
-<option value="30000">30s</option>
-</select><button onclick="captureCanvas()">📷 Snapshot</button></div>
+<div id="playbackToolbar" style="position: fixed; bottom: 0; width: 100%; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); color: white; display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; z-index: 1000; display: none; border-top: 2px solid #333; box-shadow: 0 -2px 10px rgba(0,0,0,0.3);">
+  <button onclick="recordState('start')" style="background: linear-gradient(45deg, #4CAF50, #45a049); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">🎬 Start</button>
+  <button onclick="recordState('end')" style="background: linear-gradient(45deg, #f44336, #da190b); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">🏁 End</button>
+  <button onclick="startPlayback()" style="background: linear-gradient(45deg, #2196F3, #1976D2); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">▶️ Play</button>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <span style="color: #ccc; font-size: 12px;">Timeline:</span>
+    <input id="playbackSlider" max="1" min="0" step="0.01" style="width: 250px; height: 6px; border-radius: 3px; background: #333; outline: none;" type="range" value="0"/>
+  </div>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <span style="color: #ccc; font-size: 12px;">Duration:</span>
+    <select id="playbackDuration" style="background: #333; color: white; border: 1px solid #555; padding: 6px; border-radius: 4px; outline: none;">
+      <option value="5000">5s</option>
+      <option selected="" value="10000">10s</option>
+      <option value="15000">15s</option>
+      <option value="20000">20s</option>
+      <option value="30000">30s</option>
+    </select>
+  </div>
+  <button onclick="captureCanvas()" style="background: linear-gradient(45deg, #FF9800, #F57C00); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">📷 Snapshot</button>
+</div>
 </body>
 </html>
