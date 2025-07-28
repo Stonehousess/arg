@@ -14,27 +14,6 @@
       background-color: black;
       font-family: sans-serif;
     }
-    
-    /* Basic mobile responsiveness */
-    @media (max-width: 768px) {
-      .panel {
-        width: 280px;
-        max-width: 90vw;
-        top: 100px;
-        left: 10px;
-        padding: 15px;
-      }
-      
-      #toolbar {
-        padding: 5px;
-        font-size: 12px;
-      }
-      
-      #toolbar button {
-        padding: 4px 8px;
-        font-size: 10px;
-      }
-    }
     #toolbar {
       position: fixed;
       top: 0;
@@ -73,12 +52,31 @@
       left: 15px;
       transform: none;
       width: 300px;
+      min-width: 250px;
+      max-width: 1000px;
       background: rgba(34, 34, 34, 0.90);
       color: white;
       padding: 20px;
       border-radius: 16px;
       z-index: 999;
       display: none;
+      resize: both;
+      overflow: auto;
+    }
+    
+    .resize-handle {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      cursor: se-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
     }
     .panel input, .panel textarea {
       width: 100%;
@@ -365,15 +363,16 @@ input[type="text"] {
 <div class="panel" id="panel">
 <input id="title" placeholder="Title"/>
 <textarea id="description" placeholder="Description" rows="5"></textarea>
+<div class="resize-handle">⤡</div>
 <div style="margin-top: 1px;">
-<input accept="image/png" id="uploadImage" type="file"/>
+<input accept="image/*" id="uploadImage" type="file"/>
 </div>
 <label style="margin-left: 10px;">☝️ Upload PNG | Change 💭 Size 👇 | 
 <label><input id="sizeSlider" max="200" min="10" oninput="selectedIdea.radius = parseInt(this.value)" type="range" value="75"/>
 </label>
 <div style="margin-bottom: 10px;">
-<label>Current📋:
-    <select id="imageSelector" onchange="selectImageFromList()">
+<label>Select Image:
+    <select id="imageSelector" onchange="selectImageFromList()" style="background-color: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px; width: 100%; margin-top: 5px;">
 <option value="">None</option>
 <option value="a1.png">a1.png</option>
 <option value="a2.png">a2.png</option>
@@ -404,11 +403,6 @@ input[type="text"] {
 <option value="a27.png">a27.png</option>
 <option value="a28.png">a28.png</option>
 <option value="a29.png">a29.png</option>
-</select>
-</label>
-<label>RE:Tired💚:
-    <select id="imageSelect" onchange="selectImageFromList()">
-<option value="">None</option>
 <option value="l1.png">l1.png</option>
 <option value="l2.png">l2.png</option>
 <option value="l3.png">l3.png</option>
@@ -448,12 +442,16 @@ input[type="text"] {
 <div style="margin-bottom: 10px;">
 <label><input id="toggleGlow" type="checkbox"/> Glow</label>
 <label><input id="toggleFlash" type="checkbox"/> Flash</label>
+<label><input id="toggleAnimateColors" type="checkbox"/> Animate Colors</label>
+<label><input id="toggleTransparent" type="checkbox"/> Transparent</label>
 </div>
 <div style="margin-top: 10px;">
 <button onclick="savePanel()">Save</button>
 <button onclick="changeColor()">💭️Color</button>
 <button onclick="changeTextColor()">💬Color</button>
 <button onclick="cycleFont()">Font</button>
+<button onclick="clearUploadedImage()">🗑️ Image</button>
+<button onclick="testImageUpload()">🧪 Test</button>
 <button onclick="deleteIdea()">Delete</button>
 <button onclick="closePanel()">Close</button>
 </div>
@@ -549,11 +547,39 @@ defaultBackground.onload = () => {
     });
 
     function showPanel() {
-      document.getElementById("title").value = selectedIdea.title;
-      document.getElementById("description").value = selectedIdea.description;
-      document.getElementById("sizeSlider").value = selectedIdea.radius || 80;
-      panel.style.display = "block";
+  document.getElementById("title").value = selectedIdea.title;
+  document.getElementById("description").value = selectedIdea.description;
+  document.getElementById("sizeSlider").value = selectedIdea.radius || 80;
+  
+  // Update image selector to show current image
+  if (selectedIdea.image) {
+    // Check if it's a data URL (uploaded image)
+    if (selectedIdea.image.startsWith('data:')) {
+      document.getElementById("imageSelector").value = "";
+      // Show indicator that custom image is uploaded
+      const uploadInput = document.getElementById('uploadImage');
+      uploadInput.style.border = '2px solid gold';
+      uploadInput.title = "Custom image uploaded";
+    } else {
+      // It's a file from the dropdown
+      document.getElementById("imageSelector").value = selectedIdea.image;
+      document.getElementById('uploadImage').style.border = '';
+      document.getElementById('uploadImage').title = "Upload custom image";
     }
+  } else {
+    document.getElementById("imageSelector").value = "";
+    document.getElementById('uploadImage').style.border = '';
+    document.getElementById('uploadImage').title = "Upload custom image";
+  }
+  
+  // Update checkboxes
+  document.getElementById("toggleGlow").checked = selectedIdea.glow || false;
+  document.getElementById("toggleFlash").checked = selectedIdea.flash || false;
+  document.getElementById("toggleAnimateColors").checked = selectedIdea.animateColors || false;
+  document.getElementById("toggleTransparent").checked = selectedIdea.transparent || false;
+  
+  panel.style.display = "block";
+}
     function savePanel() {
       selectedIdea.title = document.getElementById("title").value;
       selectedIdea.description = document.getElementById("description").value;
@@ -567,12 +593,43 @@ defaultBackground.onload = () => {
       }
     }
     function closePanel() { panel.style.display = "none"; }
-    function changeColor() { selectedIdea.color = randomColor(); }
-    function changeTextColor() { selectedIdea.textColor = randomTextColor(); }
-    function cycleFont() {
-      fontIndex = (fontIndex + 1) % fonts.length;
-      selectedIdea.font = fonts[fontIndex];
-    }
+function changeColor() { selectedIdea.color = randomColor(); }
+function changeTextColor() { selectedIdea.textColor = randomTextColor(); }
+function cycleFont() {
+  fontIndex = (fontIndex + 1) % fonts.length;
+  selectedIdea.font = fonts[fontIndex];
+}
+function clearUploadedImage() {
+  if (selectedIdea) {
+    selectedIdea.image = null;
+    document.getElementById("imageSelector").value = "";
+    document.getElementById('uploadImage').style.border = '';
+    document.getElementById('uploadImage').title = "Upload custom image";
+    console.log("🗑️ Image cleared from bubble");
+  }
+}
+
+// Test function to debug image upload
+function testImageUpload() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  
+  console.log("🧪 Testing image upload for bubble at:", selectedIdea.x, selectedIdea.y);
+  console.log("🧪 Current image:", selectedIdea.image ? "has image" : "no image");
+  console.log("🧪 Loaded images count:", Object.keys(loadedImages).length);
+  
+  // Force reload the current image if it exists
+  if (selectedIdea.image) {
+    const img = new Image();
+    img.onload = () => {
+      loadedImages[selectedIdea.image] = img;
+      console.log("🔄 Reloaded image for bubble");
+    };
+    img.src = selectedIdea.image;
+  }
+}
 
     function draw() {
   if (backgroundImage) {
@@ -583,28 +640,9 @@ defaultBackground.onload = () => {
       ctx.rotate((backgroundRotation * Math.PI) / 180);
       // Calculate dimensions to cover the entire screen after rotation
       const maxDimension = Math.max(width, height);
-      const minDimension = Math.min(width, height);
-      
-      // Calculate scale based on window aspect ratio
-      const windowAspect = width / height;
-      const imageAspect = backgroundImage.width / backgroundImage.height;
-      
-      let scaleX, scaleY;
-      if (windowAspect > imageAspect) {
-        // Window is wider than image - scale to height
-        scaleY = height / backgroundImage.height;
-        scaleX = scaleY;
-      } else {
-        // Window is taller than image - scale to width
-        scaleX = width / backgroundImage.width;
-        scaleY = scaleX;
-      }
-      
-      // Ensure we cover the entire screen
-      const finalScale = Math.max(scaleX, scaleY);
-      const scaledWidth = backgroundImage.width * finalScale;
-      const scaledHeight = backgroundImage.height * finalScale;
-      
+      const scale = maxDimension / Math.min(backgroundImage.width, backgroundImage.height);
+      const scaledWidth = backgroundImage.width * scale;
+      const scaledHeight = backgroundImage.height * scale;
       ctx.drawImage(backgroundImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
       ctx.restore();
     } else {
@@ -662,12 +700,19 @@ defaultBackground.onload = () => {
       if (loadedImages[src]) {
         ctx.drawImage(loadedImages[src], a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
       } else {
+        // Handle both file paths and data URLs
         const img = new Image();
         img.onload = () => {
           loadedImages[src] = img;
-          ctx.drawImage(img, a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
+          console.log("🖼️ Image loaded successfully:", src.substring(0, 50) + "...");
+        };
+        img.onerror = () => {
+          console.error("❌ Failed to load image:", src.substring(0, 50) + "...");
+          // Remove the failed image reference
+          a.image = null;
         };
         img.src = src;
+        console.log("🔄 Loading image:", src.substring(0, 50) + "...");
       }
     } else {
       ctx.fillStyle = a.animateColors
@@ -683,7 +728,7 @@ defaultBackground.onload = () => {
 
     ctx.restore();
 
-    // Glow or flash
+    // Glow or flash (drawn after image so it's visible)
     if (a.glow || a.flash) {
       ctx.save();
       ctx.shadowColor = "white";
@@ -692,12 +737,25 @@ defaultBackground.onload = () => {
       ctx.beginPath();
       ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
       ctx.strokeStyle = "white";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+    
+    // Additional glow effect for better visibility
+    if (a.glow) {
+      ctx.save();
+      ctx.shadowColor = "white";
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.radius + 2, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
     }
 
-    // Text
+    // Text (drawn last so it's always on top)
     ctx.fillStyle = a.textColor || "white";
     ctx.font = `bold 14px ${a.font || "Tahoma"}`;
     ctx.textAlign = "center";
@@ -2349,6 +2407,7 @@ document.getElementById('playbackSlider').addEventListener('input', (e) => {
 
 function rotateBackground() {
   backgroundRotation = (backgroundRotation + 90) % 360;
+  console.log("🔄 Background rotated to:", backgroundRotation + "°");
 }
 function togglePlaybackToolbar() {
   const toolbar = document.getElementById('bottomToolbar');
@@ -2398,10 +2457,16 @@ function applyToBubble(bubble) {
 
 
 document.getElementById('toggleGlow').addEventListener('change', (e) => {
-  if (selectedIdea) selectedIdea.glow = e.target.checked;
+  if (selectedIdea) {
+    selectedIdea.glow = e.target.checked;
+    console.log("✨ Glow:", e.target.checked ? "ON" : "OFF");
+  }
 });
 document.getElementById('toggleFlash').addEventListener('change', (e) => {
-  if (selectedIdea) selectedIdea.flash = e.target.checked;
+  if (selectedIdea) {
+    selectedIdea.flash = e.target.checked;
+    console.log("⚡ Flash:", e.target.checked ? "ON" : "OFF");
+  }
 });
 document.getElementById('toggleAnimateColors').addEventListener('change', (e) => {
   if (selectedIdea) selectedIdea.animateColors = e.target.checked;
@@ -2415,16 +2480,17 @@ document.getElementById('toggleTransparent').addEventListener('change', (e) => {
 document.getElementById('imageSelector').addEventListener('change', (e) => {
   if (selectedIdea) {
     selectedIdea.image = e.target.value || null;
+    console.log("🖼️ Selected from dropdown 1:", e.target.value || "none");
   }
 });
 let lastChangedDropdown = null;
 
+
+
 function selectImageFromList() {
   if (!selectedIdea) return;
 
-  const val1 = document.getElementById('imageSelector').value;
-  const val2 = document.getElementById('imageSelect').value;
-  const value = val2 || val1 || null;
+  const value = document.getElementById('imageSelector').value || null;
 
   selectedIdea.image = value;
 
@@ -2432,6 +2498,7 @@ function selectImageFromList() {
     const img = new Image();
     img.onload = () => {
       loadedImages[value] = img;
+      console.log("🖼️ Selected image loaded:", value);
     };
     img.src = value;
   }
@@ -2449,18 +2516,59 @@ document.getElementById('uploadImage').addEventListener('change', function (e) {
     return;
   }
 
+  console.log("📁 Starting upload for file:", file.name, "size:", file.size, "type:", file.type);
+
   const reader = new FileReader();
   reader.onload = function (event) {
     const imageData = event.target.result;
-
-    selectedIdea.image = imageData;
-
+    console.log("📁 File read successfully, size:", imageData.length);
+    
+    // Create a unique identifier for this uploaded image
+    const imageId = `uploaded_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Preload the image first
     const img = new Image();
+    img.crossOrigin = "anonymous"; // Handle CORS issues
+    
     img.onload = () => {
+      console.log("🖼️ Image loaded successfully:", img.width, "x", img.height);
+      
+      // Only set the image after it's successfully loaded
+      selectedIdea.image = imageData;
       loadedImages[imageData] = img;
-      console.log("Image uploaded and stored for this bubble.");
+      
+      console.log("✅ Image uploaded and stored for this bubble.");
+      console.log("🎯 Bubble position:", selectedIdea.x, selectedIdea.y);
+      console.log("📊 Total loaded images:", Object.keys(loadedImages).length);
+      
+      // Show success feedback
+      const uploadInput = document.getElementById('uploadImage');
+      uploadInput.style.border = '2px solid green';
+      uploadInput.title = "Image uploaded successfully!";
+      
+      setTimeout(() => {
+        uploadInput.style.border = '';
+        uploadInput.title = "Upload custom image";
+      }, 2000);
+      
+      // Force immediate redraw
+      requestAnimationFrame(() => {
+        console.log("🔄 Forcing redraw after upload");
+      });
     };
+    
+    img.onerror = (error) => {
+      console.error("❌ Failed to load uploaded image:", error);
+      alert("Failed to load the uploaded image. Please try again.");
+    };
+    
+    // Set the source after setting up event handlers
     img.src = imageData;
+  };
+
+  reader.onerror = function(error) {
+    console.error("❌ FileReader error:", error);
+    alert("Error reading the file. Please try again.");
   };
 
   reader.readAsDataURL(file);
