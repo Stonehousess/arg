@@ -387,7 +387,7 @@ input[type="text"] {
 </style>
 </head>
 <body>
-<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button>
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button><button onclick="cycleBackground()" style="margin-left:10px;">🔄IMG🖼️</button>
 <div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
@@ -420,7 +420,6 @@ input[type="text"] {
 <option value="credits"> 💚</option>
 </select>
 </label>
-<button onclick="cycleBackground()" style="margin-left:10px;">🔄IMG🖼️</button>
 <button onclick="rotateBackground()">🔄</button>
 <button onclick="deleteAllIdeas()" style="margin-left:10px;">🚮Delete💭Ideas🗑️</button>
 </div>
@@ -429,16 +428,16 @@ input[type="text"] {
 <iframe allow="autoplay" allowfullscreen="" frameborder="0" id="ytFrame" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-3; display:none;"></iframe>
 <div class="dice-overlay" id="diceOverlay"></div>
 <canvas id="canvas"></canvas>
-<div class="panel" id="panel">
-<input id="title" placeholder="Title"/>
-<textarea id="description" placeholder="Description" rows="5"></textarea>
-<div class="resize-handle">⤡</div>
 <div class="music-panel" id="musicPanel">
   <h3>🎵 Music Player</h3>
   <div id="musicList">
     <!-- Music items will be loaded here -->
   </div>
 </div>
+<div class="panel" id="panel">
+<input id="title" placeholder="Title"/>
+<textarea id="description" placeholder="Description" rows="5"></textarea>
+<div class="resize-handle">⤡</div>
 <div style="margin-top: 1px;">
 <input accept="image/*" id="uploadImage" type="file"/>
 </div>
@@ -449,69 +448,69 @@ input[type="text"] {
 <label>Select Image:
     <select id="imageSelector" onchange="selectImageFromList()" style="background-color: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px; width: 100%; margin-top: 5px;">
 <option value="">None</option>
-<option value="a1.png">a1.png</option>
-<option value="a2.png">a2.png</option>
-<option value="a3.png">a3.png</option>
-<option value="a4.png">a4.png</option>
-<option value="a5.png">a5.png</option>
-<option value="a6.png">a6.png</option>
-<option value="a7.png">a7.png</option>
-<option value="a8.png">a8.png</option>
-<option value="a9.png">a9.png</option>
-<option value="a10.png">a10.png</option>
-<option value="a11.png">a11.png</option>
-<option value="a12.png">a12.png</option>
-<option value="a13.png">a13.png</option>
-<option value="a14.png">a14.png</option>
-<option value="a15.png">a15.png</option>
-<option value="a16.png">a16.png</option>
-<option value="a17.png">a17.png</option>
-<option value="a18.png">a18.png</option>
-<option value="a19.png">a19.png</option>
-<option value="a20.png">a20.png</option>
-<option value="a21.png">a21.png</option>
-<option value="a22.png">a22.png</option>
-<option value="a23.png">a23.png</option>
-<option value="a24.png">a24.png</option>
-<option value="a25.png">a25.png</option>
-<option value="a26.png">a26.png</option>
-<option value="a27.png">a27.png</option>
-<option value="a28.png">a28.png</option>
-<option value="a29.png">a29.png</option>
-<option value="l1.png">l1.png</option>
-<option value="l2.png">l2.png</option>
-<option value="l3.png">l3.png</option>
-<option value="l4.png">l4.png</option>
-<option value="l5.png">l5.png</option>
-<option value="l6.png">l6.png</option>
-<option value="l7.png">l7.png</option>
-<option value="l8.png">l8.png</option>
-<option value="l9.png">l9.png</option>
-<option value="l10.png">l10.png</option>
-<option value="l11.png">l11.png</option>
-<option value="l12.png">l12.png</option>
-<option value="l13.png">l13.png</option>
-<option value="l14.png">l14.png</option>
-<option value="l15.png">l15.png</option>
-<option value="l16.png">l16.png</option>
-<option value="l17.png">l17.png</option>
-<option value="l18.png">l18.png</option>
-<option value="l19.png">l19.png</option>
-<option value="l20.png">l20.png</option>
-<option value="l21.png">l21.png</option>
-<option value="l22.png">l22.png</option>
-<option value="l23.png">l23.png</option>
-<option value="l24.png">l24.png</option>
-<option value="l25.png">l25.png</option>
-<option value="l26.png">l26.png</option>
-<option value="l27.png">l27.png</option>
-<option value="l28.png">l28.png</option>
-<option value="l29.png">l29.png</option>
-<option value="l30.png">l30.png</option>
-<option value="l31.png">l31.png</option>
-<option value="l32.png">l32.png</option>
-<option value="l33.png">l33.png</option>
-<option value="l34.png">l34.png</option>
+<option value="images/a1.png">a1.png</option>
+<option value="images/a2.png">a2.png</option>
+<option value="images/a3.png">a3.png</option>
+<option value="images/a4.png">a4.png</option>
+<option value="images/a5.png">a5.png</option>
+<option value="images/a6.png">a6.png</option>
+<option value="images/a7.png">a7.png</option>
+<option value="images/a8.png">a8.png</option>
+<option value="images/a9.png">a9.png</option>
+<option value="images/a10.png">a10.png</option>
+<option value="images/a11.png">a11.png</option>
+<option value="images/a12.png">a12.png</option>
+<option value="images/a13.png">a13.png</option>
+<option value="images/a14.png">a14.png</option>
+<option value="images/a15.png">a15.png</option>
+<option value="images/a16.png">a16.png</option>
+<option value="images/a17.png">a17.png</option>
+<option value="images/a18.png">a18.png</option>
+<option value="images/a19.png">a19.png</option>
+<option value="images/a20.png">a20.png</option>
+<option value="images/a21.png">a21.png</option>
+<option value="images/a22.png">a22.png</option>
+<option value="images/a23.png">a23.png</option>
+<option value="images/a24.png">a24.png</option>
+<option value="images/a25.png">a25.png</option>
+<option value="images/a26.png">a26.png</option>
+<option value="images/a27.png">a27.png</option>
+<option value="images/a28.png">a28.png</option>
+<option value="images/a29.png">a29.png</option>
+  <option value="images/l1.png">l1.png</option>
+  <option value="images/l2.png">l2.png</option>
+  <option value="images/l3.png">l3.png</option>
+  <option value="images/l4.png">l4.png</option>
+  <option value="images/l5.png">l5.png</option>
+  <option value="images/l6.png">l6.png</option>
+  <option value="images/l7.png">l7.png</option>
+  <option value="images/l8.png">l8.png</option>
+  <option value="images/l9.png">l9.png</option>
+  <option value="images/l10.png">l10.png</option>
+  <option value="images/l11.png">l11.png</option>
+  <option value="images/l12.png">l12.png</option>
+  <option value="images/l13.png">l13.png</option>
+  <option value="images/l14.png">l14.png</option>
+  <option value="images/l15.png">l15.png</option>
+  <option value="images/l16.png">l16.png</option>
+  <option value="images/l17.png">l17.png</option>
+  <option value="images/l18.png">l18.png</option>
+  <option value="images/l19.png">l19.png</option>
+  <option value="images/l20.png">l20.png</option>
+  <option value="images/l21.png">l21.png</option>
+  <option value="images/l22.png">l22.png</option>
+  <option value="images/l23.png">l23.png</option>
+  <option value="images/l24.png">l24.png</option>
+  <option value="images/l25.png">l25.png</option>
+  <option value="images/l26.png">l26.png</option>
+  <option value="images/l27.png">l27.png</option>
+  <option value="images/l28.png">l28.png</option>
+  <option value="images/l29.png">l29.png</option>
+  <option value="images/l30.png">l30.png</option>
+  <option value="images/l31.png">l31.png</option>
+  <option value="images/l32.png">l32.png</option>
+  <option value="images/l33.png">l33.png</option>
+  <option value="images/l34.png">l34.png</option>
 </select>
 </label>
 <div style="margin-bottom: 10px;">
@@ -715,7 +714,19 @@ function testImageUpload() {
       ctx.rotate((backgroundRotation * Math.PI) / 180);
       // Calculate dimensions to cover the entire screen after rotation
       // Force the image to fill the entire window regardless of aspect ratio
-      ctx.drawImage(backgroundImage, -width / 2, -height / 2, width, height);
+      // For rotated backgrounds, we need to ensure complete coverage
+      const maxDimension = Math.max(width, height);
+      const minDimension = Math.min(width, height);
+      
+      // Calculate scale to ensure complete coverage
+      const scaleX = width / backgroundImage.width;
+      const scaleY = height / backgroundImage.height;
+      const scale = Math.max(scaleX, scaleY) * 1.2; // Add 20% extra to ensure coverage
+      
+      const scaledWidth = backgroundImage.width * scale;
+      const scaledHeight = backgroundImage.height * scale;
+      
+      ctx.drawImage(backgroundImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
       ctx.restore();
     } else {
       ctx.drawImage(backgroundImage, 0, 0, width, height);
