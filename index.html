@@ -2362,7 +2362,7 @@ credits:  {
       img.onload = function () {
         backgroundImage = img;
       };
-      img.src = `${themeName}1.png`;
+      img.src = `images/${themeName}1.png`;
     }
 
     function cycleBackground() {
@@ -2373,9 +2373,9 @@ credits:  {
       };
       img.onerror = function () {
         backgroundIndex = 1;
-        img.src = `${currentTheme}1.png`;
+        img.src = `images/${currentTheme}1.png`;
       };
-      img.src = `${currentTheme}${backgroundIndex}.png`;
+      img.src = `images/${currentTheme}${backgroundIndex}.png`;
     }
     let gamepadIndex = null;
 let gamepadActive = false;
