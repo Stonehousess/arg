@@ -14,6 +14,27 @@
       background-color: black;
       font-family: sans-serif;
     }
+    
+    /* Basic mobile responsiveness */
+    @media (max-width: 768px) {
+      .panel {
+        width: 280px;
+        max-width: 90vw;
+        top: 100px;
+        left: 10px;
+        padding: 15px;
+      }
+      
+      #toolbar {
+        padding: 5px;
+        font-size: 12px;
+      }
+      
+      #toolbar button {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+    }
     #toolbar {
       position: fixed;
       top: 0;
@@ -555,7 +576,40 @@ defaultBackground.onload = () => {
 
     function draw() {
   if (backgroundImage) {
-    ctx.drawImage(backgroundImage, 0, 0, width, height);
+    // Apply background rotation
+    if (backgroundRotation !== 0) {
+      ctx.save();
+      ctx.translate(width / 2, height / 2);
+      ctx.rotate((backgroundRotation * Math.PI) / 180);
+      // Calculate dimensions to cover the entire screen after rotation
+      const maxDimension = Math.max(width, height);
+      const minDimension = Math.min(width, height);
+      
+      // Calculate scale based on window aspect ratio
+      const windowAspect = width / height;
+      const imageAspect = backgroundImage.width / backgroundImage.height;
+      
+      let scaleX, scaleY;
+      if (windowAspect > imageAspect) {
+        // Window is wider than image - scale to height
+        scaleY = height / backgroundImage.height;
+        scaleX = scaleY;
+      } else {
+        // Window is taller than image - scale to width
+        scaleX = width / backgroundImage.width;
+        scaleY = scaleX;
+      }
+      
+      // Ensure we cover the entire screen
+      const finalScale = Math.max(scaleX, scaleY);
+      const scaledWidth = backgroundImage.width * finalScale;
+      const scaledHeight = backgroundImage.height * finalScale;
+      
+      ctx.drawImage(backgroundImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+      ctx.restore();
+    } else {
+      ctx.drawImage(backgroundImage, 0, 0, width, height);
+    }
   } else {
     ctx.clearRect(0, 0, width, height);
   }
