@@ -97,6 +97,49 @@
       animation: diceFadeIn 0.3s ease-in;
     }
     
+    .music-panel {
+      position: fixed;
+      top: 130px;
+      right: 15px;
+      width: 300px;
+      background: rgba(34, 34, 34, 0.90);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      z-index: 999;
+      display: none;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    
+    .music-panel h3 {
+      color: gold;
+      margin-top: 0;
+      text-align: center;
+    }
+    
+    .music-item {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: 1px solid darkgreen;
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    .music-item:hover {
+      background: rgba(0, 0, 0, 0.8);
+      color: gold;
+    }
+    
+    .music-item.playing {
+      background: rgba(0, 100, 0, 0.6);
+      color: gold;
+      border-color: gold;
+    }
+    
     @keyframes diceFadeIn {
       from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
       to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -157,6 +200,7 @@
     z-index: -2;
     pointer-events: none;
     display: none; /* default hidden, shown when video is loaded */
+    background: black;
 }
   
 #bubblePanel {
@@ -343,7 +387,7 @@ input[type="text"] {
 </style>
 </head>
 <body>
-<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button>
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button>
 <div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
@@ -389,6 +433,12 @@ input[type="text"] {
 <input id="title" placeholder="Title"/>
 <textarea id="description" placeholder="Description" rows="5"></textarea>
 <div class="resize-handle">⤡</div>
+<div class="music-panel" id="musicPanel">
+  <h3>🎵 Music Player</h3>
+  <div id="musicList">
+    <!-- Music items will be loaded here -->
+  </div>
+</div>
 <div style="margin-top: 1px;">
 <input accept="image/*" id="uploadImage" type="file"/>
 </div>
@@ -665,10 +715,7 @@ function testImageUpload() {
       ctx.rotate((backgroundRotation * Math.PI) / 180);
       // Calculate dimensions to cover the entire screen after rotation
       // Force the image to fill the entire window regardless of aspect ratio
-      const scaledWidth = width;
-      const scaledHeight = height;
-      
-      ctx.drawImage(backgroundImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+      ctx.drawImage(backgroundImage, -width / 2, -height / 2, width, height);
       ctx.restore();
     } else {
       ctx.drawImage(backgroundImage, 0, 0, width, height);
@@ -866,6 +913,9 @@ function testImageUpload() {
   setTimeout(() => {
   video.play().then(() => {
     console.log("Video playing as background.");
+    console.log("Video element:", video);
+    console.log("Video display:", video.style.display);
+    console.log("Video z-index:", video.style.zIndex);
   }).catch((err) => {
     console.warn("Autoplay blocked, trying again on user interaction:", err);
     document.body.addEventListener("click", () => video.play(), { once: true });
@@ -2453,6 +2503,56 @@ function rollDice() {
   setTimeout(() => {
     diceOverlay.style.display = 'none';
   }, 5000);
+}
+
+function toggleMusicPanel() {
+  const musicPanel = document.getElementById('musicPanel');
+  if (musicPanel.style.display === 'none' || musicPanel.style.display === '') {
+    musicPanel.style.display = 'block';
+    loadMusicList();
+  } else {
+    musicPanel.style.display = 'none';
+  }
+}
+
+function loadMusicList() {
+  const musicList = document.getElementById('musicList');
+  
+  // Sample MP3 files - you can replace these with actual files from your mp3 folder
+  const musicFiles = [
+    'song1.mp3',
+    'song2.mp3', 
+    'song3.mp3',
+    'background_music.mp3',
+    'ambient_sounds.mp3',
+    'chill_beats.mp3',
+    'upbeat_track.mp3',
+    'relaxing_melody.mp3'
+  ];
+  
+  musicList.innerHTML = '';
+  
+  musicFiles.forEach(file => {
+    const musicItem = document.createElement('div');
+    musicItem.className = 'music-item';
+    musicItem.textContent = file;
+    musicItem.onclick = () => playMusic(file);
+    musicList.appendChild(musicItem);
+  });
+}
+
+function playMusic(filename) {
+  // Remove playing class from all items
+  document.querySelectorAll('.music-item').forEach(item => {
+    item.classList.remove('playing');
+  });
+  
+  // Add playing class to clicked item
+  event.target.classList.add('playing');
+  
+  console.log(`🎵 Playing: ${filename}`);
+  // Here you would implement actual audio playback
+  // For now, just log the selection
 }
 function togglePlaybackToolbar() {
   const toolbar = document.getElementById('bottomToolbar');
