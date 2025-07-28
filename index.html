@@ -410,10 +410,10 @@ input[type="text"] {
 <label style="margin-left: 10px;">Image:
         <input accept="image/*" id="bgLoader" type="file"/>
 </label>
-<label style="margin-left: 10px;">Video File:
+<label style="margin-left: 10px;">🎬 Video File:
         <input accept="video/*" id="videoLoader" type="file"/>
 </label>
-<label style="margin-left: 10px;">Video Link:
+<label style="margin-left: 10px;">📺 Video Link:
         <input id="youtubeLink" placeholder="Paste Video URL" style="width:50px;" type="text"/>
 <button onclick="loadYouTubeVideo()">Load</button>
 </label>
@@ -428,6 +428,7 @@ input[type="text"] {
   <div id="musicList">
     <!-- Music items will be loaded here -->
   </div>
+  <button onclick="stopMusic()" style="background: linear-gradient(45deg, #f44336, #da190b); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%;">🔇 Stop Music</button>
 </div>
 <div class="panel" id="panel">
 <input id="title" placeholder="Title"/>
@@ -2399,6 +2400,7 @@ function gamepadLoop() {
     const nextIndex = (currentIndex + 1) % ideas.length;
     selectedIdea = ideas[nextIndex];
     showPanel();
+    console.log("🎮 Gamepad: Selected idea", nextIndex + 1, "of", ideas.length);
   }
 
   // Move selected idea with left stick (axes 0 and 1)
@@ -2406,12 +2408,57 @@ function gamepadLoop() {
     const dx = gp.axes[0]; // X-axis
     const dy = gp.axes[1]; // Y-axis
     const speed = 5;
-    selectedIdea.x += dx * speed;
-    selectedIdea.y += dy * speed;
+    
+    // Only move if stick is moved significantly (deadzone)
+    if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+      selectedIdea.x += dx * speed;
+      selectedIdea.y += dy * speed;
+      console.log("🎮 Gamepad: Moving idea to", selectedIdea.x.toFixed(1), selectedIdea.y.toFixed(1));
+    }
   }
 
   gamepadLoopId = requestAnimationFrame(gamepadLoop);
 }
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(event) {
+  // B key for cycle background
+  if (event.key.toLowerCase() === 'b') {
+    event.preventDefault();
+    cycleBackground();
+    console.log("⌨️ Keyboard: B pressed - cycling background");
+  }
+  
+  // M key for toggle motion
+  if (event.key.toLowerCase() === 'm') {
+    event.preventDefault();
+    speedMultiplier = speedMultiplier > 0 ? 0 : 1;
+    console.log("⌨️ Keyboard: M pressed - motion", speedMultiplier > 0 ? "ON" : "OFF");
+  }
+  
+  // Arrow keys for moving selected idea
+  if (selectedIdea && panel.style.display === "none") {
+    const moveSpeed = 10;
+    switch(event.key) {
+      case 'ArrowUp':
+        event.preventDefault();
+        selectedIdea.y -= moveSpeed;
+        break;
+      case 'ArrowDown':
+        event.preventDefault();
+        selectedIdea.y += moveSpeed;
+        break;
+      case 'ArrowLeft':
+        event.preventDefault();
+        selectedIdea.x -= moveSpeed;
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        selectedIdea.x += moveSpeed;
+        break;
+    }
+  }
+});
 
 
 
@@ -2516,6 +2563,11 @@ function toggleMusicPanel() {
   if (musicPanel.style.display === 'none' || musicPanel.style.display === '') {
     musicPanel.style.display = 'block';
     loadMusicList();
+    
+    // Auto-hide after 7 seconds
+    setTimeout(() => {
+      musicPanel.style.display = 'none';
+    }, 7000);
   } else {
     musicPanel.style.display = 'none';
   }
@@ -2578,6 +2630,20 @@ function playMusic(filename) {
   }).catch(err => {
     console.error(`❌ Error playing audio: ${err}`);
     event.target.classList.remove('playing');
+  });
+}
+
+function stopMusic() {
+  // Stop any currently playing audio
+  if (window.currentAudio) {
+    window.currentAudio.pause();
+    window.currentAudio = null;
+    console.log("🔇 Music stopped");
+  }
+  
+  // Remove playing class from all items
+  document.querySelectorAll('.music-item').forEach(item => {
+    item.classList.remove('playing');
   });
 }
 function togglePlaybackToolbar() {
