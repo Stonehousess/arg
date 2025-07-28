@@ -45,6 +45,7 @@
 }
     #canvas {
       display: block;
+      z-index: -1;
     }
     .panel {
       position: fixed;
@@ -77,6 +78,28 @@
       align-items: center;
       justify-content: center;
       font-size: 12px;
+    }
+    
+    .dice-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: gold;
+      font-size: 120px;
+      font-weight: bold;
+      padding: 40px;
+      border-radius: 20px;
+      border: 3px solid darkgreen;
+      z-index: 2000;
+      display: none;
+      animation: diceFadeIn 0.3s ease-in;
+    }
+    
+    @keyframes diceFadeIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
     .panel input, .panel textarea {
       width: 100%;
@@ -320,7 +343,7 @@ input[type="text"] {
 </style>
 </head>
 <body>
-<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><button onclick="location.reload()">🔁</button>
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button>
 <div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
@@ -360,6 +383,7 @@ input[type="text"] {
 </div>
 <video autoplay="" id="bgVideo" loop="" muted="" playsinline="" style="position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-2; display:none; pointer-events: none;"></video>
 <iframe allow="autoplay" allowfullscreen="" frameborder="0" id="ytFrame" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-3; display:none;"></iframe>
+<div class="dice-overlay" id="diceOverlay"></div>
 <canvas id="canvas"></canvas>
 <div class="panel" id="panel">
 <input id="title" placeholder="Title"/>
@@ -640,24 +664,9 @@ function testImageUpload() {
       ctx.translate(width / 2, height / 2);
       ctx.rotate((backgroundRotation * Math.PI) / 180);
       // Calculate dimensions to cover the entire screen after rotation
-      const windowAspect = width / height;
-      const imageAspect = backgroundImage.width / backgroundImage.height;
-      
-      let scaleX, scaleY;
-      if (windowAspect > imageAspect) {
-        // Window is wider than image - scale to height
-        scaleY = height / backgroundImage.height;
-        scaleX = scaleY;
-      } else {
-        // Window is taller than image - scale to width
-        scaleX = width / backgroundImage.width;
-        scaleY = scaleX;
-      }
-      
-      // Ensure we cover the entire screen
-      const finalScale = Math.max(scaleX, scaleY);
-      const scaledWidth = backgroundImage.width * finalScale;
-      const scaledHeight = backgroundImage.height * finalScale;
+      // Force the image to fill the entire window regardless of aspect ratio
+      const scaledWidth = width;
+      const scaledHeight = height;
       
       ctx.drawImage(backgroundImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
       ctx.restore();
@@ -2428,8 +2437,22 @@ function rotateBackground() {
 
 function rollDice() {
   const result = Math.floor(Math.random() * 6) + 1;
-  alert(`🎲 You rolled a ${result}!`);
+  const diceOverlay = document.getElementById('diceOverlay');
+  const diceResult = document.getElementById('diceResult');
+  
+  // Show the dice result in overlay
+  diceOverlay.textContent = result;
+  diceOverlay.style.display = 'block';
+  
+  // Show the dice result in toolbar
+  diceResult.textContent = `🎲 ${result}`;
+  
   console.log("🎲 Dice roll result:", result);
+  
+  // Hide overlay after 5 seconds
+  setTimeout(() => {
+    diceOverlay.style.display = 'none';
+  }, 5000);
 }
 function togglePlaybackToolbar() {
   const toolbar = document.getElementById('bottomToolbar');
