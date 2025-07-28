@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="favicon.ico" rel="icon" type="image/x-icon"/>
+<title>💭MindsEye💬~Ideas</title>
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: black;
+      font-family: sans-serif;
+    }
+    #toolbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: #111;
+      opacity: 0.9;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+#toolbar button {
+  background-color: rgba(0, 0, 0, 0.7); /* black with opacity */
+  color: gold; /* gold text */
+  border: 2px solid darkgreen; /* dark green border */
+  font-family: 'Monaco', serif;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-right: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#toolbar button:hover {
+  background-color: rgba(0, 0, 0, 0.9); /* darker on hover */
+  transform: scale(1.05);
+}
+    #canvas {
+      display: block;
+    }
+    .panel {
+      position: fixed;
+      top: 130px;
+      left: 15px;
+      transform: none;
+      width: 300px;
+      background: rgba(34, 34, 34, 0.90);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      z-index: 999;
+      display: none;
+    }
+    .panel input, .panel textarea {
+      width: 100%;
+      margin: 5px 0;
+      background: #333;
+      border: none;
+      color: white;
+      padding: 5px;
+    }
+    .panel button {
+     margin-right: 10px;
+     padding: 6px 12px;
+     background-color: rgba(0, 0, 0, 0.7); /* black with opacity */
+     color: gold; /* gold text */
+     border: 2px solid darkgreen; /* dark green border */
+     font-family: 'Monaco', serif; /* more elegant serif font */
+     border-radius: 8px; /* optional: rounder corners */
+     cursor: pointer;
+     transition: background-color 0.3s ease, transform 0.2s ease;
+}
+    .panel button:hover {
+     background-color: rgba(0, 0, 0, 0.9); /* darker on hover */
+     transform: scale(1.05); /* subtle zoom effect */
+}
+#playbackToolbar button {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: gold;
+  border: 2px solid darkgreen;
+  font-family: 'Monaco', serif;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#playbackToolbar button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+#playbackToolbar select, #playbackToolbar input[type="range"] {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: gold;
+  border: 1px solid darkgreen;
+  font-family: 'Monaco', serif;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+    #bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -2;
+    pointer-events: none;
+    display: none; /* default hidden, shown when video is loaded */
+}
+  
+#bubblePanel {
+  resize: both;
+  overflow: auto;
+  min-width: 200px;
+  min-height: 150px;
+}
+</style>
+<style>
+#playbackToolbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  color: white;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  z-index: 1000;
+  display: none;
+  flex-wrap: wrap; /* Optional: allows wrapping on small screens */
+}
+
+#playbackToolbar button {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: gold;
+  border: 2px solid darkgreen;
+  font-family: 'Monaco', serif;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+#playbackToolbar button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+#playbackToolbar input[type="range"],
+#playbackToolbar select {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: gold;
+  border: 1px solid darkgreen;
+  font-family: 'Monaco', serif;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+#themeSelector {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: gold;
+  border: 2px solid darkgreen;
+  font-family: 'Monaco', serif;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  appearance: none; /* Hide default OS styles */
+}
+
+#themeSelector:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 150px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.6); /* black with opacity */
+  border: 2px solid darkgreen;
+  border-radius: 5px;
+  outline: none;
+  margin-left: 10px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: gold;
+  cursor: pointer;
+  border: 2px solid darkgreen;
+  box-shadow: 0 0 4px gold;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: gold;
+  cursor: pointer;
+  border: 2px solid darkgreen;
+  box-shadow: 0 0 4px gold;
+}
+/* File inputs (Image + Video File) */
+input[type="file"] {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: gold;
+  border: 2px solid darkgreen;
+  font-family: 'Monaco', serif;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Text input (YouTube Link) */
+input[type="text"] {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: gold;
+  border: 2px solid darkgreen;
+  font-family: 'Monaco', serif;
+  padding: 6px;
+  border-radius: 6px;
+  width: 120px; /* optional override for placeholder readability */
+}
+
+/* Button next to YouTube input */
+#toolbar button, #playbackToolbar button {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: gold;
+  border: 2px solid darkgreen;
+  font-family: 'Monaco', serif;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+#toolbar button:hover, #playbackToolbar button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+</style>
+<style>
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .bubble img {
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .bubble span {
+    position: relative;
+    z-index: 1;
+  }
+  .glow {
+    box-shadow: 0 0 20px 5px white;
+  }
+  .flash {
+    animation: flash 0.5s infinite alternate;
+  }
+  @keyframes flash {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+  }
+  .animate-colors {
+    animation: colorCycle 5s infinite linear;
+  }
+  @keyframes colorCycle {
+    0% { background-color: red; }
+    25% { background-color: yellow; }
+    50% { background-color: green; }
+    75% { background-color: blue; }
+    100% { background-color: red; }
+  }
+  .transparent {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+</style>
+</head>
+<body>
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="location.reload()">🔁</button>
+<div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong></div>
+<button onclick="saveIdeas()">💾Save.json</button>
+<input accept=".json" id="fileLoader" style="display:none" type="file"/>
+<button onclick="document.getElementById('fileLoader').click()">🆙 Load.json</button>
+<div>
+<label style="margin-left: 10px;">🚦Motion:⚡️
+        <input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
+</label>
+<label style="margin-left: 10px;">Image:
+        <input accept="image/*" id="bgLoader" type="file"/>
+</label>
+<label style="margin-left: 10px;">Video File:
+        <input accept="video/*" id="videoLoader" type="file"/>
+</label>
+<label style="margin-left: 10px;">Video Link:
+        <input id="youtubeLink" placeholder="Paste Video URL" style="width:50px;" type="text"/>
+<button onclick="loadYouTubeVideo()">Load</button>
+</label>
+
+<label style="margin-left: 10px;">🎨 Style:
+        <select id="themeSelector" onchange="switchTheme(this.value)">
+<option value="default">Start 😀</option>
+<option value="argyle">Argyle ♻️</option>
+<option value="cqc">Games 🎮</option>
+<option value="blank">Blank 😶</option>
+<option value="meme">Memes 🙄</option>
+<option value="recipes">Food 😋</option>
+<option value="season">🏟️S25⚽️</option>
+<option value="sleep">🥱 😴</option>
+<option value="credits"> 💚</option>
+</select>
+</label>
+<button onclick="cycleBackground()" style="margin-left:10px;">🔄IMG🖼️</button>
+<button onclick="rotateBackground()">🔄</button>
+<button onclick="deleteAllIdeas()" style="margin-left:10px;">🚮Delete💭Ideas🗑️</button>
+</div>
+</div>
+<video autoplay="" id="bgVideo" loop="" muted="" playsinline="" style="position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-2; display:none; pointer-events: none;"></video>
+<iframe allow="autoplay" allowfullscreen="" frameborder="0" id="ytFrame" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-3; display:none;"></iframe>
+<canvas id="canvas"></canvas>
+<div class="panel" id="panel">
+<input id="title" placeholder="Title"/>
+<textarea id="description" placeholder="Description" rows="5"></textarea>
+<div style="margin-top: 1px;">
+<input accept="image/png" id="uploadImage" type="file"/>
+</div>
+<label style="margin-left: 10px;">☝️ Upload PNG | Change 💭 Size 👇 | 
+<label><input id="sizeSlider" max="200" min="10" oninput="selectedIdea.radius = parseInt(this.value)" type="range" value="75"/>
+</label>
+<div style="margin-bottom: 10px;">
+<label>Current📋:
+    <select id="imageSelector" onchange="selectImageFromList()">
+<option value="">None</option>
+<option value="a1.png">a1.png</option>
+<option value="a2.png">a2.png</option>
+<option value="a3.png">a3.png</option>
+<option value="a4.png">a4.png</option>
+<option value="a5.png">a5.png</option>
+<option value="a6.png">a6.png</option>
+<option value="a7.png">a7.png</option>
+<option value="a8.png">a8.png</option>
+<option value="a9.png">a9.png</option>
+<option value="a10.png">a10.png</option>
+<option value="a11.png">a11.png</option>
+<option value="a12.png">a12.png</option>
+<option value="a13.png">a13.png</option>
+<option value="a14.png">a14.png</option>
+<option value="a15.png">a15.png</option>
+<option value="a16.png">a16.png</option>
+<option value="a17.png">a17.png</option>
+<option value="a18.png">a18.png</option>
+<option value="a19.png">a19.png</option>
+<option value="a20.png">a20.png</option>
+<option value="a21.png">a21.png</option>
+<option value="a22.png">a22.png</option>
+<option value="a23.png">a23.png</option>
+<option value="a24.png">a24.png</option>
+<option value="a25.png">a25.png</option>
+<option value="a26.png">a26.png</option>
+<option value="a27.png">a27.png</option>
+<option value="a28.png">a28.png</option>
+<option value="a29.png">a29.png</option>
+</select>
+</label>
+<label>RE:Tired💚:
+    <select id="imageSelect" onchange="selectImageFromList()">
+<option value="">None</option>
+<option value="l1.png">l1.png</option>
+<option value="l2.png">l2.png</option>
+<option value="l3.png">l3.png</option>
+<option value="l4.png">l4.png</option>
+<option value="l5.png">l5.png</option>
+<option value="l6.png">l6.png</option>
+<option value="l7.png">l7.png</option>
+<option value="l8.png">l8.png</option>
+<option value="l9.png">l9.png</option>
+<option value="l10.png">l10.png</option>
+<option value="l11.png">l11.png</option>
+<option value="l12.png">l12.png</option>
+<option value="l13.png">l13.png</option>
+<option value="l14.png">l14.png</option>
+<option value="l15.png">l15.png</option>
+<option value="l16.png">l16.png</option>
+<option value="l17.png">l17.png</option>
+<option value="l18.png">l18.png</option>
+<option value="l19.png">l19.png</option>
+<option value="l20.png">l20.png</option>
+<option value="l21.png">l21.png</option>
+<option value="l22.png">l22.png</option>
+<option value="l23.png">l23.png</option>
+<option value="l24.png">l24.png</option>
+<option value="l25.png">l25.png</option>
+<option value="l26.png">l26.png</option>
+<option value="l27.png">l27.png</option>
+<option value="l28.png">l28.png</option>
+<option value="l29.png">l29.png</option>
+<option value="l30.png">l30.png</option>
+<option value="l31.png">l31.png</option>
+<option value="l32.png">l32.png</option>
+<option value="l33.png">l33.png</option>
+<option value="l34.png">l34.png</option>
+</select>
+</label>
+<div style="margin-bottom: 10px;">
+<label><input id="toggleGlow" type="checkbox"/> Glow</label>
+<label><input id="toggleFlash" type="checkbox"/> Flash</label>
+</div>
+<div style="margin-top: 10px;">
+<button onclick="savePanel()">Save</button>
+<button onclick="changeColor()">💭️Color</button>
+<button onclick="changeTextColor()">💬Color</button>
+<button onclick="cycleFont()">Font</button>
+<button onclick="deleteIdea()">Delete</button>
+<button onclick="closePanel()">Close</button>
+</div>
+</div>
+<script>
+    let movementDelayActive = true;
+    let backgroundRotation = 0; // 0, 90, 180, 270
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const panel = document.getElementById("panel");
+    let width, height;
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    movementDelayActive = true; // Start with movement disabled
+    setTimeout(() => {
+    movementDelayActive = false; // Enable after 10 seconds
+ }, 10000); // 10 seconds
+
+const border = 10;
+    
+    let speedMultiplier = 1;
+    let ideas = [];
+    let selectedIdea = null;
+    let backgroundImage = null;
+    const defaultBackground = new Image();
+defaultBackground.src = "default1.png";
+defaultBackground.onload = () => {
+  backgroundImage = defaultBackground;
+};
+   
+    const fonts = [
+  "Arial",
+  "Monaco",
+  "Verdana",
+  "Tahoma",
+  "Trebuchet MS",
+  "Comic Sans MS",
+  "Impact",
+  "Franklin Gothic Medium",
+  "Century Gothic",
+  "Calibri",
+  "Cambria",
+  "Constantia",
+  "Corbel",
+  "Arial Black",
+  "System-ui",         // Default OS font
+  "Sans-serif",
+  "Times New Roman",
+  "Georgia",
+  "Garamond",
+  "Courier New",
+  "Lucida Sans Unicode",
+  "Palatino Linotype",
+  "Serif",
+  "Monospace"
+];
+    let fontIndex = 0;
+
+    function randomColor() {
+      return `hsl(${Math.random() * 360}, 100%, 70%)`;
+    }
+    function randomTextColor() {
+      const colors = ['white', 'black', 'cyan', 'yellow', 'magenta', 'lime', 'red'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    function addIdea(x, y, title = "New Idea", description = "", color = randomColor(), textColor = "white", radius = 80) {
+      const maxSpeed = 3;
+      ideas.push({ title, description, x, y, vx: (Math.random() * 2 - 1) * maxSpeed, vy: (Math.random() * 2 - 1) * maxSpeed, color, textColor, radius, font: fonts[0] });
+    }
+
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      let clicked = false;
+      for (let idea of ideas) {
+        const dx = x - idea.x;
+        const dy = y - idea.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < idea.radius) {
+          selectedIdea = idea;
+          showPanel();
+          clicked = true;
+          break;
+        }
+      }
+      if (!clicked) addIdea(x, y);
+    });
+
+    function showPanel() {
+      document.getElementById("title").value = selectedIdea.title;
+      document.getElementById("description").value = selectedIdea.description;
+      document.getElementById("sizeSlider").value = selectedIdea.radius || 80;
+      panel.style.display = "block";
+    }
+    function savePanel() {
+      selectedIdea.title = document.getElementById("title").value;
+      selectedIdea.description = document.getElementById("description").value;
+      panel.style.display = "none";
+    }
+    function deleteIdea() {
+      if (selectedIdea) {
+        ideas = ideas.filter(idea => idea !== selectedIdea);
+        selectedIdea = null;
+        panel.style.display = "none";
+      }
+    }
+    function closePanel() { panel.style.display = "none"; }
+    function changeColor() { selectedIdea.color = randomColor(); }
+    function changeTextColor() { selectedIdea.textColor = randomTextColor(); }
+    function cycleFont() {
+      fontIndex = (fontIndex + 1) % fonts.length;
+      selectedIdea.font = fonts[fontIndex];
+    }
+
+    function draw() {
+  if (backgroundImage) {
+    ctx.drawImage(backgroundImage, 0, 0, width, height);
+  } else {
+    ctx.clearRect(0, 0, width, height);
+  }
+
+  for (let i = 0; i < ideas.length; i++) {
+    const a = ideas[i];
+    const actualSpeed = movementDelayActive ? 0 : speedMultiplier;
+
+    // Movement
+    a.x += a.vx * actualSpeed;
+    a.y += a.vy * actualSpeed;
+
+    // Boundary bounce
+    if (a.x - a.radius < border) { a.x = border + a.radius; a.vx *= -1; }
+    if (a.x + a.radius > width - border) { a.x = width - border - a.radius; a.vx *= -1; }
+    if (a.y - a.radius < border + 50) { a.y = border + 50 + a.radius; a.vy *= -1; }
+    if (a.y + a.radius > height - border) { a.y = height - border - a.radius; a.vy *= -1; }
+
+    // Collision detection
+    for (let j = i + 1; j < ideas.length; j++) {
+      const b = ideas[j];
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < a.radius + b.radius) {
+        const angle = Math.atan2(dy, dx);
+        const tx = a.x - Math.cos(angle) * (a.radius + b.radius);
+        const ty = a.y - Math.sin(angle) * (a.radius + b.radius);
+        b.x = tx;
+        b.y = ty;
+        [a.vx, b.vx] = [b.vx, a.vx];
+        [a.vy, b.vy] = [b.vy, a.vy];
+      }
+    }
+
+    // Gradient glow background (optional)
+    const gradient = ctx.createRadialGradient(a.x, a.y, a.radius * 0.6, a.x, a.y, a.radius);
+    gradient.addColorStop(0, a.color);
+    gradient.addColorStop(1, "black");
+
+    // Begin rendering
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
+    ctx.clip();
+
+    if (a.image) {
+      const src = a.image;
+      if (loadedImages[src]) {
+        ctx.drawImage(loadedImages[src], a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
+      } else {
+        const img = new Image();
+        img.onload = () => {
+          loadedImages[src] = img;
+          ctx.drawImage(img, a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
+        };
+        img.src = src;
+      }
+    } else {
+      ctx.fillStyle = a.animateColors
+        ? `hsl(${(Date.now() * 0.08) % 360}, 100%, 70%)`
+        : a.transparent
+          ? "rgba(255,255,255,0.1)"
+          : gradient;
+
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = a.color;
+      ctx.fill();
+    }
+
+    ctx.restore();
+
+    // Glow or flash
+    if (a.glow || a.flash) {
+      ctx.save();
+      ctx.shadowColor = "white";
+      ctx.shadowBlur = a.glow ? 20 : 0;
+      if (a.flash) ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() / 100);
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Text
+    ctx.fillStyle = a.textColor || "white";
+    ctx.font = `bold 14px ${a.font || "Tahoma"}`;
+    ctx.textAlign = "center";
+    const words = a.title.split(" ");
+    words.forEach((word, idx) => {
+      ctx.fillText(word, a.x, a.y + idx * 16 - (words.length - 1) * 8);
+    });
+  }
+
+  requestAnimationFrame(draw);
+}
+    draw();
+
+    function saveIdeas() {
+      const dataToSave = ideas.map(idea => ({ ...idea }));
+      const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "ideas.json";
+      a.click();
+    }
+
+    document.getElementById("fileLoader").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+    try {
+      const loaded = JSON.parse(event.target.result);
+      ideas = loaded.map(idea => ({
+        ...idea,
+        font: idea.font || fonts[0],
+        radius: idea.radius || 80
+      }));
+
+      // Delay movement after loading
+      movementDelayActive = true;
+      setTimeout(() => {
+        movementDelayActive = false;
+      }, 10000);
+    } catch (err) {
+      alert("Invalid JSON file.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+    document.getElementById("bgLoader").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          backgroundImage = img;
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+   document.getElementById("videoLoader").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const video = document.getElementById("bgVideo");
+  const iframe = document.getElementById("ytFrame");
+
+  backgroundImage = null;
+  iframe.style.display = "none";
+  iframe.src = "";
+
+  const objectURL = URL.createObjectURL(file); // ⬅️ Better than FileReader for video
+  video.src = objectURL;
+  video.style.display = "block";
+
+  // Force video to reload and play after src set
+  video.src = objectURL;
+  video.style.display = "block";
+
+  video.load();
+
+  setTimeout(() => {
+  video.play().then(() => {
+    console.log("Video playing as background.");
+  }).catch((err) => {
+    console.warn("Autoplay blocked, trying again on user interaction:", err);
+    document.body.addEventListener("click", () => video.play(), { once: true });
+  });
+}, 100);
+});
+let isDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let dragIdea = null;
+    let mouseMoved = false;
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (speedMultiplier !== 0 || panel.style.display === "block") return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      for (let idea of ideas) {
+        const dx = x - idea.x;
+        const dy = y - idea.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < idea.radius) {
+          isDragging = true;
+          dragIdea = idea;
+          dragOffsetX = dx;
+          dragOffsetY = dy;
+          mouseMoved = false;
+          return;
+        }
+      }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (isDragging && dragIdea && speedMultiplier === 0) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        dragIdea.x = x - dragOffsetX;
+        dragIdea.y = y - dragOffsetY;
+        mouseMoved = true;
+      }
+    });
+
+    canvas.addEventListener("mouseup", (e) => {
+      if (isDragging && dragIdea && !mouseMoved) {
+        selectedIdea = dragIdea;
+        showPanel();
+      }
+      isDragging = false;
+      dragIdea = null;
+    });
+    function loadYouTubeVideo() {
+      const url = document.getElementById("youtubeLink").value;
+      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/);
+      const video = document.getElementById("bgVideo");
+      const iframe = document.getElementById("ytFrame");
+      if (match) {
+        const videoId = match[1];
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}`;
+        backgroundImage = null;
+        video.style.display = "none";
+        video.pause();
+        iframe.src = embedUrl;
+        iframe.style.display = "block";
+      } else {
+        alert("Invalid YouTube URL.");
+      }
+    }
+
+    function clearBackground() {
+      backgroundImage = null;
+      document.getElementById("bgVideo").style.display = "none";
+      document.getElementById("bgVideo").pause();
+      document.getElementById("ytFrame").style.display = "none";
+      document.getElementById("ytFrame").src = "";
+    }
+    function deleteAllIdeas() {
+  if (confirm("📋CREATE BLANK CANVAS? ✅")) {
+    // Clear all ideas
+    ideas = [];
+    selectedIdea = null;
+    panel.style.display = "none";
+
+    // Reset background image
+    backgroundImage = null;
+
+    // Reset video
+    const video = document.getElementById("bgVideo");
+    video.style.display = "none";
+    video.pause();
+    video.src = "";
+
+    // Reset YouTube iframe
+    const iframe = document.getElementById("ytFrame");
+    iframe.style.display = "none";
+    iframe.src = "";
+  }
+}
+
+    // Initial Ideas
+    ideas = [
+  {
+    "title": "",
+    "description": "3-1 at Home Park",
+    "x": 438.8647105177631,
+    "y": 348.4802222717975,
+    "vx": 1.260720341360491,
+    "vy": -1.203145322799383,
+    "color": "green",
+    "textColor": "black",
+    "radius": 54,
+    "font": "Arial",
+    "image": "a6.png",
+    "flash": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1129.8229595345738,
+    "y": 670.4869481845279,
+    "vx": -0.5723384563789395,
+    "vy": -2.7988764134555977,
+    "color": "hsl(169.5204249808646, 100%, 70%)",
+    "textColor": "white",
+    "radius": 54,
+    "font": "Arial",
+    "image": "a11.png"
+  },
+  {
+    "title": "      Sorinola",
+    "description": "",
+    "x": 560.578741411884,
+    "y": 246.52958140650912,
+    "vx": -2.555616986936294,
+    "vy": 0.2387138134250082,
+    "color": "hsl(106.0048409709453, 100%, 70%)",
+    "textColor": "lime",
+    "radius": 50,
+    "font": "Arial",
+    "image": "a29.png",
+    "glow": true
+  },
+  {
+    "title": "      OwenO",
+    "description": "",
+    "x": 510.578741411884,
+    "y": 146.52958140650912,
+    "vx": -2.555616986936294,
+    "vy": 0.2387138134250082,
+    "color": "hsl(106.0048409709453, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a18.png",
+    "glow": true
+  },
+  {
+    "title": "      Wiredu",
+    "description": "",
+    "x": 938.0577758440062,
+    "y": 381.4751947554653,
+    "vx": 1.4314693203590225,
+    "vy": 2.0794291091997867,
+    "color": "hsl(252.82353685903811, 100%, 70%)",
+    "textColor": "black",
+    "radius": 50,
+    "font": "Arial",
+    "image": "a4.png",
+    "flash": false,
+    "glow": true
+  },
+  {
+    "title": "    5.Pleguezuelo",
+    "description": "",
+    "x": 441.45665488003056,
+    "y": 603.3223767774596,
+    "vx": 2.897184152429392,
+    "vy": 2.241689214399569,
+    "color": "hsl(146.91765164925442, 100%, 70%)",
+    "textColor": "yellow",
+    "radius": 52,
+    "font": "Trebuchet MS",
+    "image": "a5.png",
+    "glow": true
+  },
+  {
+    "title": "Bali     Mumba",
+    "description": "",
+    "x": 1106.567292080782,
+    "y": 273.83790640802437,
+    "vx": -1.6989220135694567,
+    "vy": -0.2812933931466559,
+    "color": "hsl(96.72915377921444, 100%, 70%)",
+    "textColor": "yellow",
+    "radius": 48,
+    "font": "Lucida Sans Unicode",
+    "image": "a2.png",
+    "glow": true
+  },
+  {
+    "title": "      10. Amaechi",
+    "description": "",
+    "x": 1445.037263776416,
+    "y": 452.3373631154707,
+    "vx": 1.882214795057802,
+    "vy": -2.070210111510945,
+    "color": "hsl(252.34171552918932, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a10.png",
+    "glow": true
+  },
+  {
+    "title": "      Galloway",
+    "description": "",
+    "x": 407.955577031997,
+    "y": 129.6628646940399,
+    "vx": -1.3992001763953028,
+    "vy": 2.567039910572836,
+    "color": "hsl(89.83617564464495, 100%, 70%)",
+    "textColor": "yellow",
+    "radius": 55,
+    "font": "Courier New",
+    "image": "a9.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 198.14796761454,
+    "y": 469.54132550880917,
+    "vx": -1.649079753654305,
+    "vy": -2.8256139799654356,
+    "color": "hsl(24.307170121348456, 100%, 70%)",
+    "textColor": "white",
+    "radius": 69,
+    "font": "Arial",
+    "image": "a1.png",
+    "glow": true
+  },
+  {
+    "title": "     Watts",
+    "description": "",
+    "x": 955.7553280596137,
+    "y": 551.4576757404113,
+    "vx": 1.8414992163861779,
+    "vy": -0.5470138346575946,
+    "color": "hsl(351.41143663281053, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a17.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 516.847968946306,
+    "y": 436.915942134623,
+    "vx": 2.5038823180659646,
+    "vy": -2.706633593745956,
+    "color": "hsl(66.39945239408976, 100%, 70%)",
+    "textColor": "white",
+    "radius": 18,
+    "font": "Arial",
+    "image": "a21.png",
+    "glow": true
+  },
+  {
+    "title": "   Paterson",
+    "description": "",
+    "x": 1257.597551645393,
+    "y": 450.26344220282056,
+    "vx": -2.727582905818548,
+    "vy": 2.020265480956251,
+    "color": "hsl(204.05950274274593, 100%, 70%)",
+    "textColor": "white",
+    "radius": 53,
+    "font": "Arial",
+    "image": "a7.png",
+    "flash": false,
+    "glow": true
+  },
+  {
+    "title": "     (c)Joe Edwards",
+    "description": "",
+    "x": 627.8219585551415,
+    "y": 669.0833596944369,
+    "vx": -1.3005688681209613,
+    "vy": -2.5865243312150525,
+    "color": "hsl(112.74450176357617, 100%, 70%)",
+    "textColor": "white",
+    "radius": 57,
+    "font": "Tahoma",
+    "image": "a8.png",
+    "glow": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1088.7569876688044,
+    "y": 464.5166715074256,
+    "vx": 1.9729551240392345,
+    "vy": 2.5314653797664977,
+    "color": "hsl(125.97890321544668, 100%, 70%)",
+    "textColor": "white",
+    "radius": 21,
+    "font": "Arial",
+    "image": "a23.png",
+    "glow": false,
+    "flash": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 792.0925068107239,
+    "y": 143.84931037872525,
+    "vx": -1.1525288168916539,
+    "vy": -0.8009637309900604,
+    "color": "hsl(37.62768643513751, 100%, 70%)",
+    "textColor": "white",
+    "radius": 53,
+    "font": "Arial",
+    "image": "a19.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 666.3877961801683,
+    "y": 136.09534643020598,
+    "vx": 2.8913980850556573,
+    "vy": 2.944397012348978,
+    "color": "hsl(330.16318962145965, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a16.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1074.3261702804978,
+    "y": 144.8519822234622,
+    "vx": 0.6616969681492546,
+    "vy": 2.9752644521069236,
+    "color": "hsl(262.2434224951693, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a15.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1521.0362919964402,
+    "y": 451.95303303344804,
+    "vx": 1.0521794313957362,
+    "vy": 0.11027968113262254,
+    "color": "hsl(153.96142025185642, 100%, 70%)",
+    "textColor": "white",
+    "radius": 19,
+    "font": "Arial",
+    "image": "a21.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1253.2911097849142,
+    "y": 141,
+    "vx": 1,
+    "vy": 1,
+    "color": "hsl(266.80831007995465, 100%, 70%)",
+    "textColor": "white",
+    "radius": 60,
+    "font": "Arial",
+    "image": "a13.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 261,
+    "y": 151,
+    "vx": -1.7916159179163342,
+    "vy": -1.814208650607946,
+    "color": "hsl(123.97262968121507, 100%, 70%)",
+    "textColor": "white",
+    "radius": 53,
+    "font": "Arial",
+    "image": "a27.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1455,
+    "y": 147,
+    "vx": -2.238481215005998,
+    "vy": 0.29852795372246255,
+    "color": "hsl(289.09439844980164, 100%, 70%)",
+    "textColor": "white",
+    "radius": 52,
+    "font": "Arial",
+    "image": "a3.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1679,
+    "y": 140,
+    "vx": 1.6692620465932226,
+    "vy": 1.4014624045013233,
+    "color": "hsl(131.17772009651742, 100%, 70%)",
+    "textColor": "white",
+    "radius": 51,
+    "font": "Arial",
+    "image": "a12.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1808,
+    "y": 162.80347676483115,
+    "vx": 2.17444995509932,
+    "vy": -2.158829730837228,
+    "color": "hsl(193.52566759469707, 100%, 70%)",
+    "textColor": "white",
+    "radius": 45,
+    "font": "Arial",
+    "image": "a14.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 935,
+    "y": 156,
+    "vx": 1.4578020622274135,
+    "vy": -0.6168881712837142,
+    "color": "hsl(231.7055957100566, 100%, 70%)",
+    "textColor": "white",
+    "radius": 47,
+    "font": "Arial",
+    "image": "a24.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 465,
+    "y": 851,
+    "vx": 1.4992230691735136,
+    "vy": -2.6373370895124104,
+    "color": "hsl(309.71138499031537, 100%, 70%)",
+    "textColor": "white",
+    "radius": 23,
+    "font": "Arial",
+    "image": "a22.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1239,
+    "y": 869,
+    "vx": 2.4620901960485204,
+    "vy": 0.5307034114014588,
+    "color": "hsl(333.65800721281323, 100%, 70%)",
+    "textColor": "white",
+    "radius": 25,
+    "font": "Arial",
+    "image": "a20.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1568,
+    "y": 150,
+    "vx": -0.9451692738006636,
+    "vy": 0.33023958137795817,
+    "color": "hsl(107.23473760146486, 100%, 70%)",
+    "textColor": "white",
+    "radius": 43,
+    "font": "Arial",
+    "image": "a28.png",
+    "glow": true
+  }
+]
+let toolbar = document.getElementById('toolbar');
+let inactivityTimeout;
+
+function showToolbar() {
+  toolbar.style.opacity = "1";
+  clearTimeout(inactivityTimeout);
+  inactivityTimeout = setTimeout(() => {
+    toolbar.style.opacity = "0";
+  }, 5000); // 5 seconds
+}
+
+// Show on any mouse movement
+document.addEventListener("mousemove", showToolbar);
+
+// Initially call it so toolbar hides after 5s
+showToolbar();
+  
+    let currentTheme = "default";
+    let backgroundIndex = 1;
+    
+    const themePresets = {
+      default: {
+        ideas: [...ideas],
+        bg: "default1.png"
+      },
+      cqc: {
+        ideas: [
+  {
+    "title": "",
+    "description": "",
+    "x": 358.2527121369603,
+    "y": 346.45703270124443,
+    "vx": 0.35151055673423004,
+    "vy": 2.435546891874921,
+    "color": "hsl(67.26192022230275, 100%, 70%)",
+    "textColor": "white",
+    "radius": 62,
+    "font": "Arial",
+    "image": "l3.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1564.8067554662866,
+    "y": 327.2753317834405,
+    "vx": -1.9878765749481846,
+    "vy": 2.492252820118642,
+    "color": "hsl(139.91524203693803, 100%, 70%)",
+    "textColor": "white",
+    "radius": 68,
+    "font": "Arial",
+    "image": "l4.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 431,
+    "y": 748,
+    "vx": 1.1614214205776796,
+    "vy": -2.2367504485206355,
+    "color": "hsl(191.89806599193358, 100%, 70%)",
+    "textColor": "white",
+    "radius": 60,
+    "font": "Arial",
+    "image": "l2.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1750,
+    "y": 538,
+    "vx": -2.6853774613163797,
+    "vy": -2.7259476366710977,
+    "color": "hsl(127.23694310531901, 100%, 70%)",
+    "textColor": "white",
+    "radius": 63,
+    "font": "Arial",
+    "image": "l5.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1433,
+    "y": 741,
+    "vx": 2.4617753958229622,
+    "vy": 2.510897540099248,
+    "color": "hsl(334.34575693904037, 100%, 70%)",
+    "textColor": "white",
+    "radius": 63,
+    "font": "Arial",
+    "image": "l8.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 129,
+    "y": 527,
+    "vx": -0.6861455142184185,
+    "vy": -2.6954829203378177,
+    "color": "hsl(217.30224307389682, 100%, 70%)",
+    "textColor": "white",
+    "radius": 69,
+    "font": "Arial",
+    "image": "l7.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 960,
+    "y": 851,
+    "vx": -1.0933425054687722,
+    "vy": 1.9117263286194006,
+    "color": "hsl(254.0872352592045, 100%, 70%)",
+    "textColor": "white",
+    "radius": 59,
+    "font": "Arial",
+    "image": "l1.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 946,
+    "y": 292,
+    "vx": 1.078293018313335,
+    "vy": -0.13113271942065707,
+    "color": "hsl(319.5115481470086, 100%, 70%)",
+    "textColor": "white",
+    "radius": 80,
+    "font": "Arial",
+    "image": "l26.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 223.12944639313582,
+    "y": 613.7389608060978,
+    "vx": -1.0343116528841743,
+    "vy": 1.9520595917203052,
+    "color": "hsl(321.6047791937284, 100%, 70%)",
+    "textColor": "white",
+    "radius": 59,
+    "font": "Arial",
+    "image": "l26.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 831,
+    "y": 465,
+    "vx": -2.7164527841027692,
+    "vy": 2.5971470318095813,
+    "color": "hsl(2.18992732131281, 100%, 70%)",
+    "textColor": "white",
+    "radius": 55,
+    "font": "Arial",
+    "image": "l12.png",
+    "glow": true
+  }
+],
+        bg: "cqc1.png"
+      },
+      argyle: {
+        ideas: [
+  {
+    "title": "",
+    "description": "3-1 at Home Park",
+    "x": 438.8647105177631,
+    "y": 348.4802222717975,
+    "vx": 1.260720341360491,
+    "vy": -1.203145322799383,
+    "color": "green",
+    "textColor": "black",
+    "radius": 54,
+    "font": "Arial",
+    "image": "a6.png",
+    "flash": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1129.8229595345738,
+    "y": 670.4869481845279,
+    "vx": -0.5723384563789395,
+    "vy": -2.7988764134555977,
+    "color": "hsl(169.5204249808646, 100%, 70%)",
+    "textColor": "white",
+    "radius": 54,
+    "font": "Arial",
+    "image": "a11.png"
+  },
+  {
+    "title": "      Sorinola",
+    "description": "",
+    "x": 560.578741411884,
+    "y": 246.52958140650912,
+    "vx": -2.555616986936294,
+    "vy": 0.2387138134250082,
+    "color": "hsl(106.0048409709453, 100%, 70%)",
+    "textColor": "lime",
+    "radius": 50,
+    "font": "Arial",
+    "image": "a29.png",
+    "glow": true
+  },
+  {
+    "title": "      OwenO",
+    "description": "",
+    "x": 510.578741411884,
+    "y": 146.52958140650912,
+    "vx": -1.3992001763953028,
+    "vy": 2.567039910572836,
+    "color": "hsl(106.0048409709453, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a18.png",
+    "glow": true
+  },
+  {
+    "title": "      Wiredu",
+    "description": "",
+    "x": 938.0577758440062,
+    "y": 381.4751947554653,
+    "vx": 1.4314693203590225,
+    "vy": 2.0794291091997867,
+    "color": "hsl(252.82353685903811, 100%, 70%)",
+    "textColor": "black",
+    "radius": 50,
+    "font": "Arial",
+    "image": "a4.png",
+    "flash": false,
+    "glow": true
+  },
+  {
+    "title": "    5.Pleguezuelo",
+    "description": "",
+    "x": 441.45665488003056,
+    "y": 603.3223767774596,
+    "vx": 2.897184152429392,
+    "vy": 2.241689214399569,
+    "color": "hsl(146.91765164925442, 100%, 70%)",
+    "textColor": "yellow",
+    "radius": 52,
+    "font": "Trebuchet MS",
+    "image": "a5.png",
+    "glow": true
+  },
+  {
+    "title": "Bali     Mumba",
+    "description": "",
+    "x": 1106.567292080782,
+    "y": 273.83790640802437,
+    "vx": -1.6989220135694567,
+    "vy": -0.2812933931466559,
+    "color": "hsl(96.72915377921444, 100%, 70%)",
+    "textColor": "yellow",
+    "radius": 48,
+    "font": "Lucida Sans Unicode",
+    "image": "a2.png",
+    "glow": true
+  },
+  {
+    "title": "      10. Amaechi",
+    "description": "",
+    "x": 1445.037263776416,
+    "y": 452.3373631154707,
+    "vx": 1.882214795057802,
+    "vy": -2.070210111510945,
+    "color": "hsl(252.34171552918932, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a10.png",
+    "glow": true
+  },
+  {
+    "title": "      Galloway",
+    "description": "",
+    "x": 407.955577031997,
+    "y": 129.6628646940399,
+    "vx": -2.555616986936294,
+    "vy": 0.2387138134250082,
+    "color": "hsl(89.83617564464495, 100%, 70%)",
+    "textColor": "yellow",
+    "radius": 55,
+    "font": "Courier New",
+    "image": "a9.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 198.14796761454,
+    "y": 469.54132550880917,
+    "vx": -1.649079753654305,
+    "vy": -2.8256139799654356,
+    "color": "hsl(24.307170121348456, 100%, 70%)",
+    "textColor": "white",
+    "radius": 69,
+    "font": "Arial",
+    "image": "a1.png",
+    "glow": true
+  },
+  {
+    "title": "     Watts",
+    "description": "",
+    "x": 955.7553280596137,
+    "y": 551.4576757404113,
+    "vx": 1.8414992163861779,
+    "vy": -0.5470138346575946,
+    "color": "hsl(351.41143663281053, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a17.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 516.847968946306,
+    "y": 436.915942134623,
+    "vx": 2.5038823180659646,
+    "vy": -2.706633593745956,
+    "color": "hsl(66.39945239408976, 100%, 70%)",
+    "textColor": "white",
+    "radius": 18,
+    "font": "Arial",
+    "image": "a21.png",
+    "glow": true
+  },
+  {
+    "title": "   Paterson",
+    "description": "",
+    "x": 1257.597551645393,
+    "y": 450.26344220282056,
+    "vx": -2.727582905818548,
+    "vy": 2.020265480956251,
+    "color": "hsl(204.05950274274593, 100%, 70%)",
+    "textColor": "white",
+    "radius": 53,
+    "font": "Arial",
+    "image": "a7.png",
+    "flash": false,
+    "glow": true
+  },
+  {
+    "title": "     (c)Joe Edwards",
+    "description": "",
+    "x": 627.8219585551415,
+    "y": 669.0833596944369,
+    "vx": -1.3005688681209613,
+    "vy": -2.5865243312150525,
+    "color": "hsl(112.74450176357617, 100%, 70%)",
+    "textColor": "white",
+    "radius": 57,
+    "font": "Tahoma",
+    "image": "a8.png",
+    "glow": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1088.7569876688044,
+    "y": 464.5166715074256,
+    "vx": 1.9729551240392345,
+    "vy": 2.5314653797664977,
+    "color": "hsl(125.97890321544668, 100%, 70%)",
+    "textColor": "white",
+    "radius": 21,
+    "font": "Arial",
+    "image": "a23.png",
+    "glow": false,
+    "flash": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 792.0925068107239,
+    "y": 143.84931037872525,
+    "vx": -1.1525288168916539,
+    "vy": -0.8009637309900604,
+    "color": "hsl(37.62768643513751, 100%, 70%)",
+    "textColor": "white",
+    "radius": 53,
+    "font": "Arial",
+    "image": "a19.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 666.3877961801683,
+    "y": 136.09534643020598,
+    "vx": 2.8913980850556573,
+    "vy": 2.944397012348978,
+    "color": "hsl(330.16318962145965, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a16.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1074.3261702804978,
+    "y": 144.8519822234622,
+    "vx": 0.6616969681492546,
+    "vy": 2.9752644521069236,
+    "color": "hsl(262.2434224951693, 100%, 70%)",
+    "textColor": "white",
+    "radius": 49,
+    "font": "Arial",
+    "image": "a15.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1521.0362919964402,
+    "y": 451.95303303344804,
+    "vx": 1.0521794313957362,
+    "vy": 0.11027968113262254,
+    "color": "hsl(153.96142025185642, 100%, 70%)",
+    "textColor": "white",
+    "radius": 19,
+    "font": "Arial",
+    "image": "a21.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1253.2911097849142,
+    "y": 141,
+    "vx": 1,
+    "vy": 1,
+    "color": "hsl(266.80831007995465, 100%, 70%)",
+    "textColor": "white",
+    "radius": 60,
+    "font": "Arial",
+    "image": "a13.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 261,
+    "y": 151,
+    "vx": -1.7916159179163342,
+    "vy": -1.814208650607946,
+    "color": "hsl(123.97262968121507, 100%, 70%)",
+    "textColor": "white",
+    "radius": 53,
+    "font": "Arial",
+    "image": "a27.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1455,
+    "y": 147,
+    "vx": -2.238481215005998,
+    "vy": 0.29852795372246255,
+    "color": "hsl(289.09439844980164, 100%, 70%)",
+    "textColor": "white",
+    "radius": 52,
+    "font": "Arial",
+    "image": "a3.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1679,
+    "y": 140,
+    "vx": 1.6692620465932226,
+    "vy": 1.4014624045013233,
+    "color": "hsl(131.17772009651742, 100%, 70%)",
+    "textColor": "white",
+    "radius": 51,
+    "font": "Arial",
+    "image": "a12.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1808,
+    "y": 162.80347676483115,
+    "vx": 2.17444995509932,
+    "vy": -2.158829730837228,
+    "color": "hsl(193.52566759469707, 100%, 70%)",
+    "textColor": "white",
+    "radius": 45,
+    "font": "Arial",
+    "image": "a14.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 935,
+    "y": 156,
+    "vx": 1.4578020622274135,
+    "vy": -0.6168881712837142,
+    "color": "hsl(231.7055957100566, 100%, 70%)",
+    "textColor": "white",
+    "radius": 47,
+    "font": "Arial",
+    "image": "a24.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 465,
+    "y": 851,
+    "vx": -1.4896968586849564,
+    "vy": -0.7193082100144297,
+    "color": "hsl(309.71138499031537, 100%, 70%)",
+    "textColor": "white",
+    "radius": 23,
+    "font": "Arial",
+    "image": "a22.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1239,
+    "y": 869,
+    "vx": 2.6016753721500203,
+    "vy": 2.588206634360777,
+    "color": "hsl(333.65800721281323, 100%, 70%)",
+    "textColor": "white",
+    "radius": 25,
+    "font": "Arial",
+    "image": "a20.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1568,
+    "y": 150,
+    "vx": -0.9451692738006636,
+    "vy": 0.33023958137795817,
+    "color": "hsl(107.23473760146486, 100%, 70%)",
+    "textColor": "white",
+    "radius": 43,
+    "font": "Arial",
+    "image": "a28.png",
+    "glow": true
+  },
+  {
+    "title": "    🥴",
+    "description": "",
+    "x": 156,
+    "y": 863,
+    "vx": -2.072437325436896,
+    "vy": -1.1163445905347469,
+    "color": "hsl(159.40913970088886, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l1.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 587,
+    "y": 872,
+    "vx": -1.027862752918072,
+    "vy": -0.4120701078240161,
+    "color": "hsl(98.29444726823058, 100%, 70%)",
+    "textColor": "white",
+    "radius": 26,
+    "font": "Arial",
+    "image": "l2.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1343.813374658076,
+    "y": 862.7424850950403,
+    "vx": 1.1147252477300964,
+    "vy": 0.8298506162096455,
+    "color": "hsl(293.29099042786623, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l3.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1087,
+    "y": 869,
+    "vx": -0.15616542679438306,
+    "vy": -0.008555117304012594,
+    "color": "hsl(319.89204294923053, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l4.png",
+    "glow": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 736,
+    "y": 879,
+    "vx": 0.1835536004123477,
+    "vy": -1.138249276448782,
+    "color": "hsl(81.72732338762596, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l5.png"
+  },
+  {
+    "title": "   💚",
+    "description": "",
+    "x": 1546,
+    "y": 862,
+    "vx": -1.3491774110122876,
+    "vy": -2.166746380815313,
+    "color": "hsl(296.5958619272866, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l7.png",
+    "glow": false
+  },
+  {
+    "title": "   💚",
+    "description": "",
+    "x": 265.98995754779486,
+    "y": 864.4863507776729,
+    "vx": 1.4992230691735136,
+    "vy": -2.6373370895124104,
+    "color": "hsl(207.36129024560415, 100%, 70%)",
+    "textColor": "white",
+    "radius": 25,
+    "font": "Arial",
+    "image": "l12.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1653,
+    "y": 821,
+    "vx": -2.3769488955395275,
+    "vy": -0.331982879982647,
+    "color": "hsl(43.294021276490106, 100%, 70%)",
+    "textColor": "white",
+    "radius": 28,
+    "font": "Arial",
+    "image": "l18.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 899,
+    "y": 842,
+    "vx": 2.2573948883164534,
+    "vy": -2.3070582530520505,
+    "color": "hsl(307.06568398222214, 100%, 70%)",
+    "textColor": "white",
+    "radius": 26,
+    "font": "Arial",
+    "image": "l19.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 812.0844431309924,
+    "y": 879,
+    "vx": 2.9427255133597914,
+    "vy": 2.3744452497319144,
+    "color": "hsl(245.47608978475924, 100%, 70%)",
+    "textColor": "white",
+    "radius": 26,
+    "font": "Arial",
+    "image": "l8.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1776,
+    "y": 872,
+    "vx": 1.391073563636182,
+    "vy": 1.4786463661577096,
+    "color": "hsl(131.84539300549514, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l21.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 369.74590641779594,
+    "y": 879,
+    "vx": 1.351437321304037,
+    "vy": -2.285399734149542,
+    "color": "hsl(217.01069722739922, 100%, 70%)",
+    "textColor": "white",
+    "radius": 28,
+    "font": "Arial",
+    "image": "l17.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 994.0721245529277,
+    "y": 879,
+    "vx": 1.8469344987920049,
+    "vy": 1.2619585345871676,
+    "color": "hsl(119.99668409208992, 100%, 70%)",
+    "textColor": "white",
+    "radius": 27,
+    "font": "Arial",
+    "image": "l16.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1438.2804636234243,
+    "y": 879,
+    "vx": 2.4620901960485204,
+    "vy": -0.5307034114014588,
+    "color": "hsl(254.0189761976136, 100%, 70%)",
+    "textColor": "white",
+    "radius": 27,
+    "font": "Arial",
+    "image": "l13.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 90,
+    "y": 775,
+    "vx": 0.2616134631963316,
+    "vy": 0.8628772201404149,
+    "color": "hsl(14.412267997899564, 100%, 70%)",
+    "textColor": "white",
+    "radius": 29,
+    "font": "Arial",
+    "image": "l15.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1808,
+    "y": 758,
+    "vx": -1.50084816025744,
+    "vy": -2.207895821745506,
+    "color": "hsl(286.7309682731214, 100%, 70%)",
+    "textColor": "white",
+    "radius": 28,
+    "font": "Arial",
+    "image": "l23.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 90,
+    "y": 645,
+    "vx": 1.6959157039505797,
+    "vy": -2.073207008971993,
+    "color": "hsl(105.63358556606337, 100%, 70%)",
+    "textColor": "white",
+    "radius": 29,
+    "font": "Arial",
+    "image": "l24.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1807,
+    "y": 645,
+    "vx": -1.7960270776735168,
+    "vy": 1.050090013839172,
+    "color": "hsl(343.74882967716053, 100%, 70%)",
+    "textColor": "white",
+    "radius": 27,
+    "font": "Arial",
+    "image": "l33.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1799.2666541181036,
+    "y": 536.2798268298305,
+    "vx": 0.7570994484197298,
+    "vy": 2.164920459798174,
+    "color": "hsl(266.6899921871529, 100%, 70%)",
+    "textColor": "white",
+    "radius": 22,
+    "font": "Arial",
+    "image": "l29.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 90,
+    "y": 256,
+    "vx": 1.5401576362987486,
+    "vy": 0.2816418526546369,
+    "color": "hsl(242.9837189379277, 100%, 70%)",
+    "textColor": "white",
+    "radius": 44,
+    "font": "Arial",
+    "image": "l20.png"
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1166.562621309401,
+    "y": 793.0408709214169,
+    "vx": -2.497339493414012,
+    "vy": -0.3147238715038576,
+    "color": "hsl(224.20161810948503, 100%, 70%)",
+    "textColor": "white",
+    "radius": 30,
+    "font": "Arial",
+    "image": "l9.png",
+    "glow": false
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1687.5487539851497,
+    "y": 889.8141235363323,
+    "vx": -2.175313142075999,
+    "vy": -0.16139345760507906,
+    "color": "hsl(23.65478573148824, 100%, 70%)",
+    "textColor": "white",
+    "radius": 32,
+    "font": "Arial",
+    "image": "l10.png",
+    "glow": true
+  },
+  {
+    "title": "",
+    "description": "",
+    "x": 1186.0302510346844,
+    "y": 879.4978900047323,
+    "vx": 0.957133831701696,
+    "vy": -0.7355857611214753,
+    "color": "hsl(78.45499126148599, 100%, 70%)",
+    "textColor": "white",
+    "radius": 29,
+    "font": "Arial",
+    "image": "l11.png"
+  }
+],
+        bg: "argyle1.png"
+      },
+      blank: {
+        ideas: [],
+        bg: "blank1.png"
+      },
+     meme: {
+        ideas: [
+    {
+      title: "💚",
+      description: "Playoff Push",
+      x: 1604.1220264398876,
+      y: 774.6661552027556,
+      vx: -2.9307834264879746,
+      vy: -1.3209971258748892,
+      color: "purple",
+      textColor: "yellow",
+      radius: 85,
+      font: "Arial"
+    },
+    {
+      title: "Meme",
+      description: "",
+      x: 1143.661675666017,
+      y: 448,
+      vx: 1.5,
+      vy: 1,
+      color: "hsl(273.35957733845265, 100%, 70%)",
+      textColor: "white",
+      radius: 100,
+      font: "Arial"
+    },
+    {
+      title: "",
+      description: "",
+      x: 520.8516322910205,
+      y: 574.7903135181778,
+      vx: 1.2034961795838606,
+      vy: -1.5693732186467053,
+      color: "hsl(52.914457387256874, 100%, 70%)",
+      textColor: "black",
+      radius: 80,
+      font: "Arial"
+    }
+  ],
+        bg: "meme1.png"
+      },
+recipes:  {
+        ideas: [],
+        bg: "recipes1.png"
+      },
+season:  {
+        ideas: [],
+        bg: "season1.png"
+      },
+sleep:  {
+        ideas: [],
+        bg: "sleep1.png"
+      },
+credits:  {
+        ideas: [],
+        bg: "credits1.png"
+      }
+};
+
+    function switchTheme(themeName) {
+      currentTheme = themeName;
+      backgroundIndex = 1;
+      const theme = themePresets[themeName];
+      if (!theme) return;
+      ideas = theme.ideas.map(idea => ({
+        ...idea,
+        font: idea.font || fonts[0],
+        radius: idea.radius || 80
+      }));
+
+      const img = new Image();
+      img.onload = function () {
+        backgroundImage = img;
+      };
+      img.src = `${themeName}1.png`;
+    }
+
+    function cycleBackground() {
+      backgroundIndex += 1;
+      const img = new Image();
+      img.onload = function () {
+        backgroundImage = img;
+      };
+      img.onerror = function () {
+        backgroundIndex = 1;
+        img.src = `${currentTheme}1.png`;
+      };
+      img.src = `${currentTheme}${backgroundIndex}.png`;
+    }
+    let gamepadIndex = null;
+let gamepadActive = false;
+let gamepadLoopId = null;
+
+window.addEventListener("gamepadconnected", (e) => {
+  gamepadIndex = e.gamepad.index;
+  gamepadActive = true;
+  console.log("🎮 Gamepad connected");
+  gamepadLoop();
+});
+
+window.addEventListener("gamepaddisconnected", () => {
+  gamepadActive = false;
+  console.log("❌ Gamepad disconnected");
+  cancelAnimationFrame(gamepadLoopId);
+});
+
+function gamepadLoop() {
+  const gp = navigator.getGamepads()[gamepadIndex];
+  if (!gp) return;
+
+  // Select next idea with Button A (index 0)
+  if (gp.buttons[0].pressed && ideas.length > 0) {
+    const currentIndex = selectedIdea ? ideas.indexOf(selectedIdea) : -1;
+    const nextIndex = (currentIndex + 1) % ideas.length;
+    selectedIdea = ideas[nextIndex];
+    showPanel();
+  }
+
+  // Move selected idea with left stick (axes 0 and 1)
+  if (selectedIdea && panel.style.display === "none") {
+    const dx = gp.axes[0]; // X-axis
+    const dy = gp.axes[1]; // Y-axis
+    const speed = 5;
+    selectedIdea.x += dx * speed;
+    selectedIdea.y += dy * speed;
+  }
+
+  gamepadLoopId = requestAnimationFrame(gamepadLoop);
+}
+
+
+
+
+const loadedImages = {};
+let recordedStates = { start: [], end: [] };
+let isPlaying = false;
+let isFrozen = false;
+let playbackT = 0;
+
+function deepCopyIdeas() {
+  return ideas.map(i => ({ ...i }));
+}
+
+function recordState(type) {
+  recordedStates[type] = deepCopyIdeas();
+  console.log(`State '${type}' recorded.`);
+  if (type === 'start') isFrozen = true;
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function applyPlayback(t) {
+  if (!recordedStates.start.length || !recordedStates.end.length) return;
+
+  let start = recordedStates.start;
+  let end = recordedStates.end;
+
+  ideas = start.map((s, i) => {
+    const e = end[i] || s;
+    return {
+      ...s,
+      x: lerp(s.x, e.x, t),
+      y: lerp(s.y, e.y, t),
+      radius: lerp(s.radius, e.radius, t),
+      color: s.color,
+      textColor: s.textColor,
+      font: s.font,
+      title: s.title,
+      description: s.description,
+    };
+  });
+}
+
+function startPlayback() {
+  if (!recordedStates.start.length || !recordedStates.end.length) return;
+  const duration = parseInt(document.getElementById('playbackDuration').value) || 10000;
+  const startTime = performance.now();
+  isPlaying = true;
+
+  function stepPlayback(now) {
+    let t = Math.min((now - startTime) / duration, 1);
+    playbackT = t;
+    applyPlayback(t);
+    document.getElementById('playbackSlider').value = t;
+    if (t < 1 && isPlaying) {
+      requestAnimationFrame(stepPlayback);
+    } else {
+      isPlaying = false;
+    }
+  }
+
+  requestAnimationFrame(stepPlayback);
+}
+
+document.getElementById('playbackSlider').addEventListener('input', (e) => {
+  isPlaying = false;
+  const t = parseFloat(e.target.value);
+  playbackT = t;
+  applyPlayback(t);
+});
+
+function rotateBackground() {
+  backgroundRotation = (backgroundRotation + 90) % 360;
+}
+function togglePlaybackToolbar() {
+  const toolbar = document.getElementById('bottomToolbar');
+  toolbar.classList.toggle("visible");
+}
+
+function togglePlaybackToolbar() {
+  const bar = document.getElementById("playbackToolbar");
+  if (bar) {
+    bar.style.display = (bar.style.display === "none") ? "block" : "none";
+  }
+}
+
+function captureCanvas() {
+  const canvas = document.getElementById("canvas");
+  if (!canvas) return;
+  const link = document.createElement("a");
+  link.download = "snapshot.png";
+  link.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+  link.click();
+}
+
+const imageInput = document.getElementById('bubbleImage');
+const styleSelect = document.getElementById('styleSelect');
+
+function applyToBubble(bubble) {
+  const style = styleSelect.value;
+  bubble.className = 'bubble';
+  if (style) bubble.classList.add(style);
+
+  imageInput.onchange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        let img = bubble.querySelector('img');
+        if (!img) {
+          img = document.createElement('img');
+          bubble.appendChild(img);
+        }
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+}
+
+
+document.getElementById('toggleGlow').addEventListener('change', (e) => {
+  if (selectedIdea) selectedIdea.glow = e.target.checked;
+});
+document.getElementById('toggleFlash').addEventListener('change', (e) => {
+  if (selectedIdea) selectedIdea.flash = e.target.checked;
+});
+document.getElementById('toggleAnimateColors').addEventListener('change', (e) => {
+  if (selectedIdea) selectedIdea.animateColors = e.target.checked;
+});
+document.getElementById('toggleTransparent').addEventListener('change', (e) => {
+  if (selectedIdea) selectedIdea.transparent = e.target.checked;
+});
+
+
+
+document.getElementById('imageSelector').addEventListener('change', (e) => {
+  if (selectedIdea) {
+    selectedIdea.image = e.target.value || null;
+  }
+});
+let lastChangedDropdown = null;
+
+function selectImageFromList() {
+  if (!selectedIdea) return;
+
+  const val1 = document.getElementById('imageSelector').value;
+  const val2 = document.getElementById('imageSelect').value;
+  const value = val2 || val1 || null;
+
+  selectedIdea.image = value;
+
+  if (value) {
+    const img = new Image();
+    img.onload = () => {
+      loadedImages[value] = img;
+    };
+    img.src = value;
+  }
+}
+
+document.getElementById('uploadImage').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  if (!file || !file.type.startsWith('image/')) {
+    alert("Please select a valid image file.");
+    return;
+  }
+
+  if (!selectedIdea) {
+    alert("Please click on a bubble first to upload an image to it.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const imageData = event.target.result;
+
+    selectedIdea.image = imageData;
+
+    const img = new Image();
+    img.onload = () => {
+      loadedImages[imageData] = img;
+      console.log("Image uploaded and stored for this bubble.");
+    };
+    img.src = imageData;
+  };
+
+  reader.readAsDataURL(file);
+});
+</script>
+</label></div>
+<div id="playbackToolbar" style="position: fixed; bottom: 0; width: 100%; background: #111; color: white;display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px; z-index: 1000; display: none;"><button onclick="recordState('start')">🎬Mark-Start</button><button onclick="recordState('end')">Mark-Fin🏁</button><button onclick="startPlayback()">▶️Play</button><input id="playbackSlider" max="1" min="0" step="0.01" style="margin-left: 10px; width: 200px;" type="range" value="0"/><select id="playbackDuration" style="margin-left: 10px;">
+<option value="5000">5s</option>
+<option selected="" value="10000">10s</option>
+<option value="15000">15s</option>
+<option value="20000">20s</option>
+<option value="30000">30s</option>
+</select><button onclick="captureCanvas()">📷 Snapshot</button></div>
+</body>
+</html>
