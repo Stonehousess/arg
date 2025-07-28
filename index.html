@@ -387,9 +387,8 @@ input[type="text"] {
 </style>
 </head>
 <body>
-<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button><button onclick="cycleBackground()" style="margin-left:10px;">🖼️</button>
-<div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong> <label style="margin-left: 10px;">🎨 Style:
-        <select id="themeSelector" onchange="switchTheme(this.value)">
+<div id="toolbar"><button onclick="togglePlaybackToolbar()">🎛️</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎵</button><button onclick="cycleBackground()" style="margin-left:10px;">🖼️</button><button onclick="rotateBackground()" style="margin-left:10px;">🔄</button>
+<div><strong>💭MindsEye💬~Ideas-Incidents-Events-Concerns-Logger😎JSON-Exporter-V1</strong> ➡️ <select id="themeSelector" onchange="switchTheme(this.value)" style="background: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px;">
 <option value="default">Start 😀</option>
 <option value="argyle">Argyle ♻️</option>
 <option value="cqc">Games 🎮</option>
@@ -399,11 +398,11 @@ input[type="text"] {
 <option value="season">🏟️S25⚽️</option>
 <option value="sleep">🥱 😴</option>
 <option value="credits"> 💚</option>
-</select>
-</label></div>
+</select></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
 <button onclick="document.getElementById('fileLoader').click()">🆙 Load.json</button>
+<button onclick="deleteAllIdeas()" style="margin-left:10px;">🚮Delete💭Ideas🗑️</button>
 <div>
 <label style="margin-left: 10px;">🚦Motion:⚡️
         <input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
@@ -418,8 +417,6 @@ input[type="text"] {
         <input id="youtubeLink" placeholder="Paste Video URL" style="width:50px;" type="text"/>
 <button onclick="loadYouTubeVideo()">Load</button>
 </label>
-<button onclick="rotateBackground()">🔄</button>
-<button onclick="deleteAllIdeas()" style="margin-left:10px;">🚮Delete💭Ideas🗑️</button>
 </div>
 </div>
 <video autoplay="" id="bgVideo" loop="" muted="" playsinline="" style="position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-2; display:none; pointer-events: none;"></video>
@@ -2529,24 +2526,14 @@ function loadMusicList() {
   
   // Get actual MP3 files from the mp3 folder
   const musicFiles = [
-    'mp3/Test.mp3'
+    'mp3/Test.mp3',
+    'mp3/Fairmont - Gazebo.mp3',
+    'mp3/Stereotype Anomaly - HEMPHILL (2025).mp3'
   ];
-  
-  // Try to detect additional MP3 files in the mp3 folder
-  // This is a fallback list - you can add more files here
-  const additionalFiles = [
-    'mp3/background.mp3',
-    'mp3/ambient.mp3',
-    'mp3/chill.mp3',
-    'mp3/upbeat.mp3'
-  ];
-  
-  // Combine the lists
-  const allMusicFiles = [...musicFiles, ...additionalFiles];
   
   musicList.innerHTML = '';
   
-  allMusicFiles.forEach(file => {
+  musicFiles.forEach(file => {
     const musicItem = document.createElement('div');
     musicItem.className = 'music-item';
     musicItem.textContent = file.split('/').pop(); // Show just filename
@@ -2555,7 +2542,7 @@ function loadMusicList() {
   });
   
   // Add a note about adding more files
-  if (allMusicFiles.length === 1) {
+  if (musicFiles.length === 1) {
     const noteItem = document.createElement('div');
     noteItem.style.cssText = 'color: #888; font-style: italic; text-align: center; padding: 10px; font-size: 12px;';
     noteItem.textContent = 'Add more MP3 files to the mp3/ folder to see them here';
