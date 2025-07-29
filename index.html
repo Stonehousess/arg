@@ -408,6 +408,20 @@ input[type="text"] {
 <button onclick="document.getElementById('fileLoader').click()">🆙 Load.json</button>
 <button onclick="deleteAllIdeas()" style="margin-left:0px;">🚮Clear💭Ideas🗑️</button>
 </div>
+
+<!-- New Media Toolbar -->
+<div id="mediaToolbar" style="position: fixed; bottom: 0; width: 100%; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); color: white; display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; z-index: 1000; display: none; border-top: 2px solid #333; box-shadow: 0 -2px 10px rgba(0,0,0,0.3);">
+  <label style="margin-left: 10px;">🖼️ Background:
+        <input accept="image/*" id="bgLoader" style="width:70px;" type="file"/>
+</label>
+  <label style="margin-left: 10px;">📀 Video:
+        <input accept="video/*" id="videoLoader" style="width:70px;" type="file"/>
+</label>
+  <label style="margin-left: 10px;">🎥 YouTube:
+        <input id="youtubeLink" placeholder="Paste Video URL" style="width:50px;" type="text"/>
+<button onclick="loadYouTubeVideo()">Load</button>
+</label>
+</div>
 <video autoplay="" id="bgVideo" loop="" muted="" playsinline="" style="position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-2; display:none; pointer-events: none;"></video>
 <iframe allow="autoplay" allowfullscreen="" frameborder="0" id="ytFrame" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-3; display:none;"></iframe>
 <div class="dice-overlay" id="diceOverlay"></div>
@@ -431,7 +445,7 @@ input[type="text"] {
 </label>
 <div style="margin-bottom: 10px;">
 <label>Select Image:
-    <select id="imageSelector" onchange="selectImageFromList()" style="background-color: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px; width: 100%; margin-top: 5px;">
+    <select id="imageSelector" style="background-color: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px; width: 100%; margin-top: 5px;">
 <option value="">None</option>
 <option value="images/a1.png">a1.png</option>
 <option value="images/a2.png">a2.png</option>
@@ -767,25 +781,29 @@ function testImageUpload() {
       const src = a.image;
       
       // Simple image loading - if loaded, draw it; if not, load it
-      if (loadedImages[src]) {
+      if (loadedImages[src] && loadedImages[src].complete) {
         try {
           ctx.drawImage(loadedImages[src], a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
+          console.log("🖼️ Drawing image for bubble:", a.title);
         } catch (error) {
           console.error("❌ Error drawing image for bubble:", a.title, "Error:", error);
           a.image = null;
         }
       } else {
         // Load the image
-        const img = new Image();
-        img.onload = () => {
-          loadedImages[src] = img;
-          console.log("🖼️ Image loaded:", src);
-        };
-        img.onerror = () => {
-          console.error("❌ Failed to load image:", src);
-          a.image = null;
-        };
-        img.src = src;
+        if (!loadedImages[src]) {
+          console.log("🔄 Loading image for bubble:", a.title, "Image:", src);
+          const img = new Image();
+          img.onload = () => {
+            loadedImages[src] = img;
+            console.log("🖼️ Image loaded successfully:", src);
+          };
+          img.onerror = () => {
+            console.error("❌ Failed to load image:", src);
+            a.image = null;
+          };
+          img.src = src;
+        }
         
         // Draw placeholder while loading
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
@@ -881,52 +899,7 @@ function testImageUpload() {
   reader.readAsText(file);
 });
 
-    document.getElementById("bgLoader").addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const img = new Image();
-        img.onload = function () {
-          backgroundImage = img;
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
 
-   document.getElementById("videoLoader").addEventListener("change", function (e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const video = document.getElementById("bgVideo");
-  const iframe = document.getElementById("ytFrame");
-
-  backgroundImage = null;
-  iframe.style.display = "none";
-  iframe.src = "";
-
-  const objectURL = URL.createObjectURL(file); // ⬅️ Better than FileReader for video
-  video.src = objectURL;
-  video.style.display = "block";
-
-  // Force video to reload and play after src set
-  video.src = objectURL;
-  video.style.display = "block";
-
-  video.load();
-
-  setTimeout(() => {
-  video.play().then(() => {
-    console.log("Video playing as background.");
-    console.log("Video element:", video);
-    console.log("Video display:", video.style.display);
-    console.log("Video z-index:", video.style.zIndex);
-  }).catch((err) => {
-    console.warn("Autoplay blocked, trying again on user interaction:", err);
-    document.body.addEventListener("click", () => video.play(), { once: true });
-  });
-}, 100);
-});
 let isDragging = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
@@ -972,6 +945,161 @@ let isDragging = false;
       isDragging = false;
       dragIdea = null;
     });
+    
+    // Add media toolbar event listeners
+    document.getElementById("bgLoader").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          backgroundImage = img;
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("videoLoader").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const video = document.getElementById("bgVideo");
+      const iframe = document.getElementById("ytFrame");
+
+      backgroundImage = null;
+      iframe.style.display = "none";
+      iframe.src = "";
+
+      const objectURL = URL.createObjectURL(file);
+      video.src = objectURL;
+      video.style.display = "block";
+
+      video.load();
+
+      setTimeout(() => {
+        video.play().then(() => {
+          console.log("Video playing as background.");
+        }).catch((err) => {
+          console.warn("Autoplay blocked, trying again on user interaction:", err);
+          document.body.addEventListener("click", () => video.play(), { once: true });
+        });
+      }, 100);
+    });
+    
+    // Add upload image listener
+    document.getElementById('uploadImage').addEventListener('change', function (e) {
+      console.log("📁 Upload event triggered!");
+      const file = e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) {
+        alert("Please select a valid image file.");
+        return;
+      }
+
+      if (!selectedIdea) {
+        alert("Please click on a bubble first to upload an image to it.");
+        return;
+      }
+
+      console.log("📁 Starting upload for file:", file.name, "size:", file.size, "type:", file.type);
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const imageData = event.target.result;
+        console.log("📁 File read successfully, size:", imageData.length);
+        
+        // Preload the image first
+        const img = new Image();
+        img.crossOrigin = "anonymous"; // Handle CORS issues
+        
+        img.onload = () => {
+          console.log("🖼️ Image loaded successfully:", img.width, "x", img.height);
+          
+          // Validate the image dimensions
+          if (img.width === 0 || img.height === 0) {
+            console.error("❌ Invalid image dimensions");
+            alert("Invalid image file. Please try a different image.");
+            return;
+          }
+          
+          // Only set the image after it's successfully loaded
+          selectedIdea.image = imageData;
+          loadedImages[imageData] = img;
+          
+          console.log("✅ Image uploaded and stored for this bubble.");
+          console.log("🎯 Bubble position:", selectedIdea.x, selectedIdea.y);
+          console.log("📊 Total loaded images:", Object.keys(loadedImages).length);
+          console.log("🖼️ Image data length:", imageData.length);
+          console.log("🖼️ Image dimensions:", img.width, "x", img.height);
+          
+          // Show success feedback
+          const uploadInput = document.getElementById('uploadImage');
+          uploadInput.style.border = '2px solid green';
+          uploadInput.title = "Image uploaded successfully!";
+          
+          setTimeout(() => {
+            uploadInput.style.border = '';
+            uploadInput.title = "Upload custom image";
+          }, 2000);
+          
+          // Force immediate redraw
+          requestAnimationFrame(() => {
+            console.log("🔄 Forcing redraw after upload");
+          });
+        };
+        
+        img.onerror = (error) => {
+          console.error("❌ Failed to load uploaded image:", error);
+          alert("Failed to load the uploaded image. Please try again.");
+        };
+        
+        // Set the source after setting up event handlers
+        img.src = imageData;
+      };
+
+      reader.onerror = function(error) {
+        console.error("❌ FileReader error:", error);
+        alert("Error reading the file. Please try again.");
+      };
+
+      reader.readAsDataURL(file);
+    });
+    
+    // Add dropdown image selector listener
+    document.getElementById('imageSelector').addEventListener('change', function (e) {
+      console.log("🖼️ Dropdown changed, selectedIdea:", selectedIdea ? selectedIdea.title : "none");
+      if (selectedIdea) {
+        const value = e.target.value || null;
+        selectedIdea.image = value;
+        console.log("🖼️ Selected from dropdown:", value || "none");
+        console.log("🖼️ Bubble title:", selectedIdea.title);
+        
+        // Preload the image if it's not already loaded
+        if (value && !loadedImages[value]) {
+          console.log("🔄 Loading dropdown image:", value);
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            loadedImages[value] = img;
+            console.log("🖼️ Dropdown image loaded successfully:", value);
+            console.log("🖼️ Image dimensions:", img.width, "x", img.height);
+            console.log("🖼️ Total loaded images:", Object.keys(loadedImages).length);
+          };
+          img.onerror = () => {
+            console.error("❌ Failed to load dropdown image:", value);
+            selectedIdea.image = null;
+            delete loadedImages[value];
+          };
+          img.src = value;
+        } else if (value && loadedImages[value]) {
+          console.log("🖼️ Dropdown image already loaded:", value);
+          console.log("🖼️ Image dimensions:", loadedImages[value].width, "x", loadedImages[value].height);
+        }
+      } else {
+        console.log("❌ No selectedIdea when dropdown changed");
+      }
+    });
+    
     function loadYouTubeVideo() {
       const url = document.getElementById("youtubeLink").value;
       const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/);
@@ -2657,6 +2785,13 @@ function togglePlaybackToolbar() {
   }
 }
 
+function toggleMediaToolbar() {
+  const bar = document.getElementById("mediaToolbar");
+  if (bar) {
+    bar.style.display = (bar.style.display === "none") ? "flex" : "none";
+  }
+}
+
 function captureCanvas() {
   const canvas = document.getElementById("canvas");
   if (!canvas) return;
@@ -2713,116 +2848,60 @@ document.getElementById('toggleTransparent').addEventListener('change', (e) => {
 
 
 
-document.getElementById('imageSelector').addEventListener('change', (e) => {
-  if (selectedIdea) {
-    const value = e.target.value || null;
-    selectedIdea.image = value;
-    console.log("🖼️ Selected from dropdown:", value || "none");
-    
-    // Preload the image if it's not already loaded
-    if (value && !loadedImages[value]) {
-      console.log("🔄 Loading dropdown image:", value);
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        loadedImages[value] = img;
-        console.log("🖼️ Dropdown image loaded successfully:", value);
-        console.log("🖼️ Image dimensions:", img.width, "x", img.height);
-      };
-      img.onerror = () => {
-        console.error("❌ Failed to load dropdown image:", value);
-        selectedIdea.image = null;
-        delete loadedImages[value];
-      };
-      img.src = value;
-    } else if (value && loadedImages[value]) {
-      console.log("🖼️ Dropdown image already loaded:", value);
-    }
-  }
-});
+
 let lastChangedDropdown = null;
 
 
 
 
 
-document.getElementById('uploadImage').addEventListener('change', function (e) {
-  const file = e.target.files[0];
-  if (!file || !file.type.startsWith('image/')) {
-    alert("Please select a valid image file.");
-    return;
-  }
 
-  if (!selectedIdea) {
-    alert("Please click on a bubble first to upload an image to it.");
-    return;
-  }
 
-  console.log("📁 Starting upload for file:", file.name, "size:", file.size, "type:", file.type);
-
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    const imageData = event.target.result;
-    console.log("📁 File read successfully, size:", imageData.length);
-    
-    // Create a unique identifier for this uploaded image
-    const imageId = `uploaded_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Preload the image first
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // Handle CORS issues
-    
-    img.onload = () => {
-      console.log("🖼️ Image loaded successfully:", img.width, "x", img.height);
-      
-      // Validate the image dimensions
-      if (img.width === 0 || img.height === 0) {
-        console.error("❌ Invalid image dimensions");
-        alert("Invalid image file. Please try a different image.");
-        return;
+// Add event listeners after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("🔄 DOMContentLoaded fired, setting up event listeners");
+  
+  const imageSelector = document.getElementById('imageSelector');
+  console.log("🖼️ imageSelector found:", !!imageSelector);
+  if (imageSelector) {
+    imageSelector.addEventListener('change', (e) => {
+      console.log("🖼️ Dropdown changed, selectedIdea:", selectedIdea ? selectedIdea.title : "none");
+      if (selectedIdea) {
+        const value = e.target.value || null;
+        selectedIdea.image = value;
+        console.log("🖼️ Selected from dropdown:", value || "none");
+        console.log("🖼️ Bubble title:", selectedIdea.title);
+        
+        // Preload the image if it's not already loaded
+        if (value && !loadedImages[value]) {
+          console.log("🔄 Loading dropdown image:", value);
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            loadedImages[value] = img;
+            console.log("🖼️ Dropdown image loaded successfully:", value);
+            console.log("🖼️ Image dimensions:", img.width, "x", img.height);
+            console.log("🖼️ Total loaded images:", Object.keys(loadedImages).length);
+          };
+          img.onerror = () => {
+            console.error("❌ Failed to load dropdown image:", value);
+            selectedIdea.image = null;
+            delete loadedImages[value];
+          };
+          img.src = value;
+        } else if (value && loadedImages[value]) {
+          console.log("🖼️ Dropdown image already loaded:", value);
+          console.log("🖼️ Image dimensions:", loadedImages[value].width, "x", loadedImages[value].height);
+        }
+      } else {
+        console.log("❌ No selectedIdea when dropdown changed");
       }
-      
-      // Only set the image after it's successfully loaded
-      selectedIdea.image = imageData;
-      loadedImages[imageData] = img;
-      
-      console.log("✅ Image uploaded and stored for this bubble.");
-      console.log("🎯 Bubble position:", selectedIdea.x, selectedIdea.y);
-      console.log("📊 Total loaded images:", Object.keys(loadedImages).length);
-      console.log("🖼️ Image data length:", imageData.length);
-      console.log("🖼️ Image dimensions:", img.width, "x", img.height);
-      
-      // Show success feedback
-      const uploadInput = document.getElementById('uploadImage');
-      uploadInput.style.border = '2px solid green';
-      uploadInput.title = "Image uploaded successfully!";
-      
-      setTimeout(() => {
-        uploadInput.style.border = '';
-        uploadInput.title = "Upload custom image";
-      }, 2000);
-      
-      // Force immediate redraw
-      requestAnimationFrame(() => {
-        console.log("🔄 Forcing redraw after upload");
-      });
-    };
-    
-    img.onerror = (error) => {
-      console.error("❌ Failed to load uploaded image:", error);
-      alert("Failed to load the uploaded image. Please try again.");
-    };
-    
-    // Set the source after setting up event handlers
-    img.src = imageData;
-  };
+    });
+  }
+  
 
-  reader.onerror = function(error) {
-    console.error("❌ FileReader error:", error);
-    alert("Error reading the file. Please try again.");
-  };
-
-  reader.readAsDataURL(file);
+  
+  
 });
 
 
