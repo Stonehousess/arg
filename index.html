@@ -536,7 +536,7 @@ function togglePlaybackToolbar() {
   }
 }
 </script>
-<div id="toolbar"><button onclick="captureCanvasOnly()">📷</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">🔁</button><button onclick="toggleMusicPanel()">🎶</button><button onclick="toggleMediaToolbar()">📺</button><button onclick="cycleBackground()" style="margin-left:10px;">🖼️</button><button onclick="rotateBackground()" style="margin-left:10px;">🔄</button>
+<div id="toolbar"><button onclick="captureCanvasOnly()">📷</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">Ⓡ</button><button onclick="toggleMusicPanel()">🎶</button><button onclick="toggleMediaToolbar()">⏯️</button><button onclick="cycleBackground()" style="margin-left:10px;">⏭️</button><button onclick="rotateBackground()" style="margin-left:10px;">🔄</button>
 <div><strong>💭MindsEye💬~Events-Ideas-Incidents-Logger😎JSON-Exporter-V1</strong>
 <br>
 ➡️ <select id="themeSelector" onchange="switchTheme(this.value)" style="background: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px;">
@@ -545,12 +545,11 @@ function togglePlaybackToolbar() {
 <option value="cqc">Games 🎮</option>
 <option value="blank">Blank 😶</option>
 <option value="meme">Memes 🙄</option>
-<option value="recipes">Food 😋</option>
+<option value="foods">Foods 😋</option>
 <option value="season">🏟️S25⚽️</option>
 <option value="sleep">🥱 😴</option>
 <option value="credits"> 💚</option>
-</select><label style="margin-left: 1px;">🚦:⚡️
-        <input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
+</select><label style="margin-left: 1px;">🚦:⚡️<input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
 </label></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
@@ -608,17 +607,16 @@ function togglePlaybackToolbar() {
 <div style="margin-top: 1px;">
 <input accept="image/*" id="uploadImage" type="file"/>
 </div>
-<label style="margin-left: 10px;">☝️ Upload PNG | Change 💭 Size 👇 | 
+<label style="margin-left: 10px;">⬆️ Upload PNG | Change 💭 Size ⬇️
 <input id="sizeSlider" max="200" min="10" oninput="selectedIdea.radius = parseInt(this.value)" type="range" value="75"/>
-</label>
-<label style="margin-left: 10px;">📝 Font Size 👇 | 
+</label><br>
+<label style="margin-left: 10px;">⬇️ Text Size<br>
 <input id="fontSizeSlider" max="48" min="8" oninput="selectedIdea.fontSize = parseInt(this.value)" type="range" value="14"/>
 </label>
-<label style="margin-left: 10px;">🔄 Rotation 👇 | 
 <input id="rotationSlider" max="360" min="0" oninput="selectedIdea.rotation = parseInt(this.value)" type="range" value="0"/>
 </label>
 <div style="margin-bottom: 10px;">
-<label>Select Image:
+<label style="margin-left: 10px;">⬆️ Rotation | ⬇️ Select Image♻️
     <select id="imageSelector" style="background-color: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px; width: 100%; margin-top: 5px;">
 <option value="">None</option>
 <option value="images/a1.png">a1.png</option>
@@ -2669,9 +2667,9 @@ showToolbar();
   ],
         bg: "images/meme1.png"
       },
-recipes:  {
+foods:  {
         ideas: [],
-        bg: "images/recipes1.png"
+        bg: "images/foods1.png"
       },
 season:  {
         ideas: [],
@@ -2764,20 +2762,19 @@ function gamepadLoop() {
   gamepadLoopId = requestAnimationFrame(gamepadLoop);
 }
 
-// Keyboard shortcuts
 document.addEventListener('keydown', function(event) {
-  // B key for cycle background
-  if (event.key.toLowerCase() === 'b') {
+  // F1 = cycle background
+  if (event.key === 'F1') {
     event.preventDefault();
     cycleBackground();
-    console.log("⌨️ Keyboard: B pressed - cycling background");
+    console.log("⌨️ Keyboard: F1 pressed - cycling background");
   }
-  
-  // M key for toggle motion
-  if (event.key.toLowerCase() === 'm') {
+
+  // F2 = toggle motion
+  if (event.key === 'F2') {
     event.preventDefault();
     speedMultiplier = speedMultiplier > 0 ? 0 : 1;
-    console.log("⌨️ Keyboard: M pressed - motion", speedMultiplier > 0 ? "ON" : "OFF");
+    console.log("⌨️ Keyboard: F2 pressed - motion", speedMultiplier > 0 ? "ON" : "OFF");
   }
   
   // Arrow keys for moving selected idea
@@ -2948,9 +2945,23 @@ function loadMusicList() {
   
   // Get actual MP3 files from the mp3 folder
   const musicFiles = [
-    'mp3/Test.mp3',
-    'mp3/Fairmont - Gazebo.mp3',
-    'mp3/Stereotype Anomaly - HEMPHILL (2025).mp3'
+    'mp3/Track1.mp3',
+    'mp3/Track2.mp3',
+    'mp3/Stereotype Anomaly - HEMPHILL (2025).mp3',
+    'mp3/Track4D+B.mp3',
+    'mp3/Track1NGE.mp3',
+    'mp3/Track2.mp3',
+    'mp3/Track3.mp3',
+    'mp3/Track4.mp3',
+    'mp3/Track5.mp3',
+    'mp3/Track6.mp3',
+    'mp3/Track7.mp3',
+    'mp3/Track8.mp3',
+    'mp3/Track9.mp3',
+    'mp3/Track10.mp3',
+    'mp3/Track11.mp3',
+    'mp3/Track12.mp3',
+    'mp3/Track13.mp3',
   ];
   
   musicList.innerHTML = '';
