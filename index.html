@@ -765,33 +765,29 @@ function testImageUpload() {
 
     if (a.image) {
       const src = a.image;
-      if (loadedImages[src] && loadedImages[src].complete && loadedImages[src].naturalWidth > 0) {
+      
+      // Simple image loading - if loaded, draw it; if not, load it
+      if (loadedImages[src]) {
         try {
           ctx.drawImage(loadedImages[src], a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
         } catch (error) {
-          console.error("❌ Error drawing image:", error);
-          // Remove the problematic image reference
+          console.error("❌ Error drawing image for bubble:", a.title, "Error:", error);
           a.image = null;
         }
       } else {
-        // Handle both file paths and data URLs
-        if (!loadedImages[src]) {
-          const img = new Image();
-          img.crossOrigin = "anonymous"; // Handle CORS issues
-          img.onload = () => {
-            loadedImages[src] = img;
-            console.log("🖼️ Image loaded successfully:", src.substring(0, 50) + "...");
-          };
-          img.onerror = () => {
-            console.error("❌ Failed to load image:", src.substring(0, 50) + "...");
-            // Remove the failed image reference
-            a.image = null;
-            delete loadedImages[src];
-          };
-          img.src = src;
-          console.log("🔄 Loading image:", src.substring(0, 50) + "...");
-        }
-        // Draw a placeholder or fallback while image is loading
+        // Load the image
+        const img = new Image();
+        img.onload = () => {
+          loadedImages[src] = img;
+          console.log("🖼️ Image loaded:", src);
+        };
+        img.onerror = () => {
+          console.error("❌ Failed to load image:", src);
+          a.image = null;
+        };
+        img.src = src;
+        
+        // Draw placeholder while loading
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
         ctx.fill();
       }
@@ -2466,6 +2462,7 @@ document.addEventListener('keydown', function(event) {
 
 
 const loadedImages = {};
+let imageLoadErrors = new Set(); // Track failed images to prevent infinite retries
 let recordedStates = { start: [], end: [] };
 let isPlaying = false;
 let isFrozen = false;
@@ -2718,30 +2715,36 @@ document.getElementById('toggleTransparent').addEventListener('change', (e) => {
 
 document.getElementById('imageSelector').addEventListener('change', (e) => {
   if (selectedIdea) {
-    selectedIdea.image = e.target.value || null;
-    console.log("🖼️ Selected from dropdown 1:", e.target.value || "none");
+    const value = e.target.value || null;
+    selectedIdea.image = value;
+    console.log("🖼️ Selected from dropdown:", value || "none");
+    
+    // Preload the image if it's not already loaded
+    if (value && !loadedImages[value]) {
+      console.log("🔄 Loading dropdown image:", value);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        loadedImages[value] = img;
+        console.log("🖼️ Dropdown image loaded successfully:", value);
+        console.log("🖼️ Image dimensions:", img.width, "x", img.height);
+      };
+      img.onerror = () => {
+        console.error("❌ Failed to load dropdown image:", value);
+        selectedIdea.image = null;
+        delete loadedImages[value];
+      };
+      img.src = value;
+    } else if (value && loadedImages[value]) {
+      console.log("🖼️ Dropdown image already loaded:", value);
+    }
   }
 });
 let lastChangedDropdown = null;
 
 
 
-function selectImageFromList() {
-  if (!selectedIdea) return;
 
-  const value = document.getElementById('imageSelector').value || null;
-
-  selectedIdea.image = value;
-
-  if (value) {
-    const img = new Image();
-    img.onload = () => {
-      loadedImages[value] = img;
-      console.log("🖼️ Selected image loaded:", value);
-    };
-    img.src = value;
-  }
-}
 
 document.getElementById('uploadImage').addEventListener('change', function (e) {
   const file = e.target.files[0];
@@ -2786,6 +2789,8 @@ document.getElementById('uploadImage').addEventListener('change', function (e) {
       console.log("✅ Image uploaded and stored for this bubble.");
       console.log("🎯 Bubble position:", selectedIdea.x, selectedIdea.y);
       console.log("📊 Total loaded images:", Object.keys(loadedImages).length);
+      console.log("🖼️ Image data length:", imageData.length);
+      console.log("🖼️ Image dimensions:", img.width, "x", img.height);
       
       // Show success feedback
       const uploadInput = document.getElementById('uploadImage');
