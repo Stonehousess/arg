@@ -765,22 +765,35 @@ function testImageUpload() {
 
     if (a.image) {
       const src = a.image;
-      if (loadedImages[src]) {
-        ctx.drawImage(loadedImages[src], a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
+      if (loadedImages[src] && loadedImages[src].complete && loadedImages[src].naturalWidth > 0) {
+        try {
+          ctx.drawImage(loadedImages[src], a.x - a.radius, a.y - a.radius, a.radius * 2, a.radius * 2);
+        } catch (error) {
+          console.error("❌ Error drawing image:", error);
+          // Remove the problematic image reference
+          a.image = null;
+        }
       } else {
         // Handle both file paths and data URLs
-        const img = new Image();
-        img.onload = () => {
-          loadedImages[src] = img;
-          console.log("🖼️ Image loaded successfully:", src.substring(0, 50) + "...");
-        };
-        img.onerror = () => {
-          console.error("❌ Failed to load image:", src.substring(0, 50) + "...");
-          // Remove the failed image reference
-          a.image = null;
-        };
-        img.src = src;
-        console.log("🔄 Loading image:", src.substring(0, 50) + "...");
+        if (!loadedImages[src]) {
+          const img = new Image();
+          img.crossOrigin = "anonymous"; // Handle CORS issues
+          img.onload = () => {
+            loadedImages[src] = img;
+            console.log("🖼️ Image loaded successfully:", src.substring(0, 50) + "...");
+          };
+          img.onerror = () => {
+            console.error("❌ Failed to load image:", src.substring(0, 50) + "...");
+            // Remove the failed image reference
+            a.image = null;
+            delete loadedImages[src];
+          };
+          img.src = src;
+          console.log("🔄 Loading image:", src.substring(0, 50) + "...");
+        }
+        // Draw a placeholder or fallback while image is loading
+        ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.fill();
       }
     } else {
       ctx.fillStyle = a.animateColors
@@ -2758,6 +2771,13 @@ document.getElementById('uploadImage').addEventListener('change', function (e) {
     
     img.onload = () => {
       console.log("🖼️ Image loaded successfully:", img.width, "x", img.height);
+      
+      // Validate the image dimensions
+      if (img.width === 0 || img.height === 0) {
+        console.error("❌ Invalid image dimensions");
+        alert("Invalid image file. Please try a different image.");
+        return;
+      }
       
       // Only set the image after it's successfully loaded
       selectedIdea.image = imageData;
