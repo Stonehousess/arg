@@ -536,10 +536,10 @@ function togglePlaybackToolbar() {
   }
 }
 </script>
-<div id="toolbar"><button onclick="captureCanvasOnly()">📷</button><button onclick="rollDice()">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()">Ⓡ</button><button onclick="toggleMusicPanel()">🎶</button><button onclick="toggleMediaToolbar()">⏯️</button><button onclick="cycleBackground()" style="margin-left:10px;">⏭️</button><button onclick="rotateBackground()" style="margin-left:10px;">🔄</button>
-<div><strong>💭MindsEye💬~Events-Ideas-Incidents-Logger😎JSON-Exporter-V1</strong>
+<div id="toolbar"><button onclick="captureCanvasOnly()" title="Snapshot">📷</button><button onclick="rollDice()" title="Random">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()" title="Reset">Ⓡ</button><button onclick="toggleMusicPanel()" title="Music Panel">🎶</button><button onclick="toggleMediaToolbar()" title="Media Toolbar">⏯️</button><button onclick="cycleBackground()" style="margin-left:10px;" title="Change Background">⏭️</button><button onclick="rotateBackground()" style="margin-left:10px;" title="Rotate Background">🔄</button>
+<div><strong>🤔💭MindsEye💬~Events-Ideas-Incidents-Logger😎JSON-Exporter-V2</strong>
 <br>
-➡️ <select id="themeSelector" onchange="switchTheme(this.value)" style="background: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px;">
+➡️ <select id="themeSelector" onchange="switchTheme(this.value)" style="background: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px;" title="Select">
 <option value="default">Start 😀</option>
 <option value="argyle">Argyle ♻️</option>
 <option value="cqc">Games 🎮</option>
@@ -549,12 +549,12 @@ function togglePlaybackToolbar() {
 <option value="season">🏟️S25⚽️</option>
 <option value="sleep">🥱 😴</option>
 <option value="credits"> 💚</option>
-</select><label style="margin-left: 1px;">⬅️🚦:⚡️<input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
+</select><label style="margin-left: 1px;" title="Motion"> ⬅️🚦:⚡️<input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
 </label></div>
-<button onclick="saveIdeas()">💾Save.json</button>
+<button onclick="saveIdeas()" title="Save .json File">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
-<button onclick="document.getElementById('fileLoader').click()">🆙 Load.json</button>
-<button onclick="deleteAllIdeas()" style="margin-left:0px;">🚮Clear💭Ideas🗑️</button>
+<button onclick="document.getElementById('fileLoader').click()" title="Load .json File">🆙 Load.json</button>
+<button onclick="deleteAllIdeas()" style="margin-left:0px;" title="Blank Canvas">🚮Clear💭Ideas🗑️</button>
 </div>
 
 <!-- New Media Toolbar -->
@@ -570,9 +570,9 @@ function togglePlaybackToolbar() {
 <button onclick="loadYouTubeVideo()">Load</button>
 </label>
   <div class="media-separator"></div>
-  <button onclick="recordState('start')" class="record-btn start-btn">🎬 Start</button>
-  <button onclick="recordState('end')" class="record-btn end-btn">🏁 End</button>
-  <button onclick="startPlayback()" class="play-btn">▶️ Play</button>
+  <button onclick="recordState('start')" class="record-btn start-btn" title="Mark In Point">🎬 In</button>
+  <button onclick="recordState('end')" class="record-btn end-btn" title="Mark Out Point">🏁 Out</button>
+  <button onclick="startPlayback()" class="play-btn" title="Play In to Out">▶️ Play</button>
   <div class="timeline-control">
     <span>Timeline:</span>
     <input id="mediaPlaybackSlider" max="1" min="0" step="0.01" type="range" value="0"/>
@@ -587,7 +587,7 @@ function togglePlaybackToolbar() {
       <option value="30000">30s</option>
     </select>
   </div>
-  <button onclick="captureCanvas()" class="snapshot-btn">📷 Snapshot</button>
+  <button onclick="captureCanvas()" class="snapshot-btn" title="Snapshot">📷 Snapshot</button>
 </div>
 <video autoplay="" id="bgVideo" loop="" muted="" playsinline="" style="position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-2; display:none; pointer-events: none;"></video>
 <iframe allow="autoplay" allowfullscreen="" frameborder="0" id="ytFrame" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-3; display:none;"></iframe>
@@ -648,6 +648,7 @@ function togglePlaybackToolbar() {
 <option value="images/a27.png">a27.png</option>
 <option value="images/a28.png">a28.png</option>
 <option value="images/a29.png">a29.png</option>
+<option value="---Archive---">None</option>
   <option value="images/l1.png">l1.png</option>
   <option value="images/l2.png">l2.png</option>
   <option value="images/l3.png">l3.png</option>
@@ -684,6 +685,10 @@ function togglePlaybackToolbar() {
   <option value="images/l34.png">l34.png</option>
   <option value="images/l35.png">l35.png</option>
   <option value="images/l36.png">l36.png</option>
+  <option value="images/l37.png">l37.png</option>
+  <option value="images/l38.png">l38.png</option>
+  <option value="images/l39.png">l39.png</option>
+  <option value="images/l40.png">l40.png</option>
 </select>
 </label>
 <div style="margin-bottom: 10px;">
@@ -2952,19 +2957,13 @@ function loadMusicList() {
     'mp3/Test1.mp3',
     'mp3/Track1NGE.mp3',
     'mp3/Stereotype Anomaly - HEMPHILL (2025).mp3',
-    'mp3/Track4D+B.mp3',
     'mp3/track2.mp3',
     'mp3/track3.mp3',
     'mp3/track4.mp3',
     'mp3/track5.mp3',
     'mp3/track6.mp3',
     'mp3/track7.mp3',
-    'mp3/track8.mp3',
-    'mp3/track9.mp3',
-    'mp3/track10.mp3',
-    'mp3/track11.mp3',
-    'mp3/track12.mp3',
-    'mp3/track13.mp3',
+    'mp3/track8.mp3'
   ];
   
   musicList.innerHTML = '';
