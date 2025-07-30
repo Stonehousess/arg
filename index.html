@@ -536,10 +536,10 @@ function togglePlaybackToolbar() {
   }
 }
 </script>
-<div id="toolbar"><button onclick="captureCanvasOnly()" title="Snapshot">📷</button><button onclick="rollDice()" title="Random">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()" title="Reset">Ⓡ</button><button onclick="toggleMusicPanel()" title="Music Panel">🎶</button><button onclick="toggleMediaToolbar()" title="Media Toolbar">⏯️</button><button onclick="cycleBackground()" style="margin-left:10px;" title="Change Background">⏭️</button><button onclick="rotateBackground()" style="margin-left:10px;" title="Rotate Background">🔄</button>
+<div id="toolbar"><button onclick="captureCanvasOnly()" title="Snapshot">📷</button><button onclick="rollDice()" title="Random">🎲</button><span id="diceResult" style="color: gold; margin: 0 10px; font-weight: bold;"></span><button onclick="location.reload()" title="Reset">Ⓡ</button><button onclick="toggleMusicPanel()" title="Music Panel">🎶</button><button onclick="toggleMediaToolbar()" title="Media Toolbar">🎛️</button><button onclick="cycleBackground()" style="margin-left:10px;" title="Change Background">⏭️</button><button onclick="rotateBackground()" style="margin-left:10px;" title="Rotate Background">🔄</button>
 <div><strong>🤔💭MindsEye💬~Events-Ideas-Incidents-Logger😎JSON-Exporter-V2</strong>
 <br>
-➡️ <select id="themeSelector" onchange="switchTheme(this.value)" style="background: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px;" title="Select">
+➡️ <select id="themeSelector" onchange="switchTheme(this.value)" style="background: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px;" title="Select Use">
 <option value="default">Start 😀</option>
 <option value="argyle">Argyle ♻️</option>
 <option value="cqc">Games 🎮</option>
@@ -616,7 +616,7 @@ function togglePlaybackToolbar() {
 <input id="rotationSlider" max="360" min="0" oninput="selectedIdea.rotation = parseInt(this.value)" type="range" value="0"/>
 </label>
 <div style="margin-bottom: 10px;">
-<label style="margin-left: 10px;">⬆️ Rotation | ⬇️ Select Image♻️
+<label style="margin-left: 10px;">⬆️ Rotation | ⬇️ Select Image ♻️
     <select id="imageSelector" style="background-color: rgba(0, 0, 0, 0.6); color: gold; border: 2px solid darkgreen; font-family: 'Monaco', serif; padding: 6px; border-radius: 6px; width: 100%; margin-top: 5px;">
 <option value="">None</option>
 <option value="images/a1.png">a1.png</option>
