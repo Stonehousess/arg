@@ -549,7 +549,7 @@ function togglePlaybackToolbar() {
 <option value="season">🏟️S25⚽️</option>
 <option value="sleep">🥱 😴</option>
 <option value="credits"> 💚</option>
-</select><label style="margin-left: 1px;">🚦:⚡️<input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
+</select><label style="margin-left: 1px;">⬅️🚦:⚡️<input max="3" min="0.0" onchange="speedMultiplier = parseFloat(this.value)" step="0.1" type="range" value="1"/>
 </label></div>
 <button onclick="saveIdeas()">💾Save.json</button>
 <input accept=".json" id="fileLoader" style="display:none" type="file"/>
@@ -682,6 +682,8 @@ function togglePlaybackToolbar() {
   <option value="images/l32.png">l32.png</option>
   <option value="images/l33.png">l33.png</option>
   <option value="images/l34.png">l34.png</option>
+  <option value="images/l35.png">l35.png</option>
+  <option value="images/l36.png">l36.png</option>
 </select>
 </label>
 <div style="margin-bottom: 10px;">
@@ -784,9 +786,11 @@ defaultBackground.onload = () => {
       return `hsl(${Math.random() * 360}, 100%, 70%)`;
     }
     function randomTextColor() {
-      const colors = ['white', 'black', 'cyan', 'yellow', 'magenta', 'lime', 'red'];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
+  const hue = Math.floor(Math.random() * 360);         // full color wheel
+  const saturation = 100;                              // max saturation for vibrancy
+  const lightness = 50 + Math.random() * 10;           // keep brightness between 50–60%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
     function addIdea(x, y, title = "New Idea", description = "", color = randomColor(), textColor = "white", radius = 80) {
       const maxSpeed = 3;
       ideas.push({ title, description, x, y, vx: (Math.random() * 2 - 1) * maxSpeed, vy: (Math.random() * 2 - 1) * maxSpeed, color, textColor, radius, font: fonts[0] });
@@ -2945,23 +2949,22 @@ function loadMusicList() {
   
   // Get actual MP3 files from the mp3 folder
   const musicFiles = [
-    'mp3/Track1.mp3',
-    'mp3/Track2.mp3',
+    'mp3/Test1.mp3',
+    'mp3/Track1NGE.mp3',
     'mp3/Stereotype Anomaly - HEMPHILL (2025).mp3',
     'mp3/Track4D+B.mp3',
-    'mp3/Track1NGE.mp3',
-    'mp3/Track2.mp3',
-    'mp3/Track3.mp3',
-    'mp3/Track4.mp3',
-    'mp3/Track5.mp3',
-    'mp3/Track6.mp3',
-    'mp3/Track7.mp3',
-    'mp3/Track8.mp3',
-    'mp3/Track9.mp3',
-    'mp3/Track10.mp3',
-    'mp3/Track11.mp3',
-    'mp3/Track12.mp3',
-    'mp3/Track13.mp3',
+    'mp3/track2.mp3',
+    'mp3/track3.mp3',
+    'mp3/track4.mp3',
+    'mp3/track5.mp3',
+    'mp3/track6.mp3',
+    'mp3/track7.mp3',
+    'mp3/track8.mp3',
+    'mp3/track9.mp3',
+    'mp3/track10.mp3',
+    'mp3/track11.mp3',
+    'mp3/track12.mp3',
+    'mp3/track13.mp3',
   ];
   
   musicList.innerHTML = '';
