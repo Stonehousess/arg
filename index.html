@@ -607,13 +607,13 @@ function togglePlaybackToolbar() {
 <div style="margin-top: 1px;">
 <input accept="image/*" id="uploadImage" type="file"/>
 </div>
-<label style="margin-left: 10px;">⬆️ Upload PNG | Change 💭 Size ⬇️
-<input id="sizeSlider" max="200" min="10" oninput="selectedIdea.radius = parseInt(this.value)" type="range" value="75"/>
+<label style="margin-left: 10px;">⬆️ Upload PNG | ⬇️ Change 💭 Size
+<input id="sizeSlider" title="Bubble Size" max="200" min="10" oninput="selectedIdea.radius = parseInt(this.value)" type="range" value="75"/>
 </label><br>
 <label style="margin-left: 10px;">⬇️ Text Size<br>
-<input id="fontSizeSlider" max="48" min="8" oninput="selectedIdea.fontSize = parseInt(this.value)" type="range" value="14"/>
+<input id="fontSizeSlider" title="Text Size" max="48" min="8" oninput="selectedIdea.fontSize = parseInt(this.value)" type="range" value="14"/>
 </label>
-<input id="rotationSlider" max="360" min="0" oninput="selectedIdea.rotation = parseInt(this.value)" type="range" value="0"/>
+<input id="rotationSlider" title="Rotate Bubble" max="360" min="0" oninput="selectedIdea.rotation = parseInt(this.value)" type="range" value="0"/>
 </label>
 <div style="margin-bottom: 10px;">
 <label style="margin-left: 10px;">⬆️ Rotation | ⬇️ Select Image ♻️
@@ -698,36 +698,17 @@ function togglePlaybackToolbar() {
 <label><input id="toggleTransparent" type="checkbox"/> Transparent</label>
 </div>
 <div style="margin-top: 10px;">
-<button onclick="savePanel()">Save</button>
-<button onclick="changeColor()">💭️Color</button>
-<button onclick="changeTextColor()">💬Color</button>
-<button onclick="cycleFont()">Font</button>
-<button onclick="clearUploadedImage()">🗑️ Image</button>
-<button onclick="testImageUpload()">🧪 Test</button>
-<button onclick="deleteIdea()">Delete</button>
-<button onclick="closePanel()">Close</button>
+<button onclick="savePanel()" title="Save">Save</button>
+<button onclick="changeColor()" title="Bubble Colour" >💭️Color</button>
+<button onclick="changeTextColor()" title="Text Colour">💬Color</button>
+<button onclick="cycleFont()" title="Cycle Fonts">Font</button>
+<button onclick="clearUploadedImage()" title="Clear IMG">🗑️ Image</button>
+<button onclick="testImageUpload()" title="AI">🧪 Test</button>
+<button onclick="deleteIdea()" title="Delete Bubble">Delete</button>
+<button onclick="closePanel()" title="Close">Close</button>
 </div>
 </div>
-<div id="playbackToolbar">
-  <button onclick="recordState('start')" class="record-btn start-btn">🎬 Start</button>
-  <button onclick="recordState('end')" class="record-btn end-btn">🏁 End</button>
-  <button onclick="startPlayback()" class="play-btn">▶️ Play</button>
-  <div class="timeline-control">
-    <span>Timeline:</span>
-    <input id="playbackSlider" max="1" min="0" step="0.01" type="range" value="0"/>
-  </div>
-  <div class="duration-control">
-    <span>Duration:</span>
-    <select id="playbackDuration">
-      <option value="5000">5s</option>
-      <option selected="" value="10000">10s</option>
-      <option value="15000">15s</option>
-      <option value="20000">20s</option>
-      <option value="30000">30s</option>
-    </select>
-  </div>
-  <button onclick="captureCanvas()" class="snapshot-btn">📷 Snapshot</button>
-</div>
+
 <script>
     let movementDelayActive = true;
     let backgroundRotation = 0; // 0, 90, 180, 270
