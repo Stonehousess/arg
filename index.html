@@ -63,6 +63,7 @@
       display: none;
       resize: both;
       overflow: auto;
+      transition: opacity 0.5s ease;
     }
     
     .resize-handle {
@@ -692,10 +693,14 @@ function togglePlaybackToolbar() {
 </select>
 </label>
 <div style="margin-bottom: 10px;">
-<label><input id="toggleGlow" type="checkbox"/> Glow</label>
-<label><input id="toggleFlash" type="checkbox"/> Flash</label>
-<label><input id="toggleAnimateColors" type="checkbox"/> Animate Colors</label>
-<label><input id="toggleTransparent" type="checkbox"/> Transparent</label>
+<button onclick="toggleGlow()" title="Toggle Glow">Glow</button>
+<button onclick="changeGlowColor()" title="Change Glow Color">Color</button>
+<button onclick="toggleFlash()" title="Toggle Flash">Flash</button>
+<button onclick="toggleAnimateColors()" title="Toggle Animate Colors">All</button>
+<button onclick="toggleTransparent()" title="Toggle Transparent">Opaque</button>
+<button onclick="toggleFixed()" title="Toggle Fixed Mode">Solid</button>
+<button onclick="toggleStatic()" title="Toggle Static Mode">Static</button>
+<button onclick="togglePanelSide()" title="Toggle Panel Side">🎭</button>
 </div>
 <div style="margin-top: 10px;">
 <button onclick="savePanel()" title="Save">Save</button>
@@ -704,6 +709,7 @@ function togglePlaybackToolbar() {
 <button onclick="cycleFont()" title="Cycle Fonts">Font</button>
 <button onclick="clearUploadedImage()" title="Clear IMG">🗑️ Image</button>
 <button onclick="testImageUpload()" title="AI">🧪 Test</button>
+<button onclick="testEffects()" title="Test Effects">🎭 Effects</button>
 <button onclick="deleteIdea()" title="Delete Bubble">Delete</button>
 <button onclick="closePanel()" title="Close">Close</button>
 </div>
@@ -779,7 +785,32 @@ defaultBackground.onload = () => {
 }
     function addIdea(x, y, title = "", description = "", color = randomColor(), textColor = "white", radius = 80) {
       const maxSpeed = 3;
-      ideas.push({ title, description, x, y, vx: (Math.random() * 2 - 1) * maxSpeed, vy: (Math.random() * 2 - 1) * maxSpeed, color, textColor, radius, font: fonts[0] });
+      // Ensure we always have a proper random color
+      const bubbleColor = color || randomColor();
+      ideas.push({ 
+        title, 
+        description, 
+        x, 
+        y, 
+        vx: (Math.random() * 2 - 1) * maxSpeed, 
+        vy: (Math.random() * 2 - 1) * maxSpeed, 
+        color: bubbleColor, 
+        textColor, 
+        radius, 
+        font: fonts[0],
+        // Initialize effects as false
+        glow: false,
+        flash: false,
+        animateColors: false,
+        transparent: false,
+        // Initialize glow color as null (will use bubble color by default)
+        glowColor: null,
+        // Initialize fixed as false (bubble will move normally)
+        fixed: false,
+        // Initialize static as false (bubble will move normally)
+        static: false
+      });
+      console.log("🆕 New bubble created with color:", bubbleColor);
     }
 
     canvas.addEventListener("click", (e) => {
@@ -829,13 +860,12 @@ defaultBackground.onload = () => {
     document.getElementById('uploadImage').title = "Upload custom image";
   }
   
-  // Update checkboxes
-  document.getElementById("toggleGlow").checked = selectedIdea.glow || false;
-  document.getElementById("toggleFlash").checked = selectedIdea.flash || false;
-  document.getElementById("toggleAnimateColors").checked = selectedIdea.animateColors || false;
-  document.getElementById("toggleTransparent").checked = selectedIdea.transparent || false;
+  // Note: Effect buttons don't need to be updated since they toggle on/off
   
   panel.style.display = "block";
+  
+  // Start panel fade-out timer
+  resetPanelFade();
 }
     function savePanel() {
       selectedIdea.title = document.getElementById("title").value;
@@ -849,8 +879,18 @@ defaultBackground.onload = () => {
         panel.style.display = "none";
       }
     }
-    function closePanel() { panel.style.display = "none"; }
-function changeColor() { selectedIdea.color = randomColor(); }
+    function closePanel() { 
+  panel.style.display = "none"; 
+  // Clear panel fade timeout
+  if (panelFadeTimeout) {
+    clearTimeout(panelFadeTimeout);
+    panelFadeTimeout = null;
+  }
+}
+function changeColor() { 
+  selectedIdea.color = randomColor(); 
+  console.log("🎨 Color changed to:", selectedIdea.color);
+}
 function changeTextColor() { selectedIdea.textColor = randomTextColor(); }
 function cycleFont() {
   fontIndex = (fontIndex + 1) % fonts.length;
@@ -859,10 +899,14 @@ function cycleFont() {
 function clearUploadedImage() {
   if (selectedIdea) {
     selectedIdea.image = null;
+    // Ensure bubble has a random color when image is cleared
+    if (!selectedIdea.color || selectedIdea.color === "black") {
+      selectedIdea.color = randomColor();
+    }
     document.getElementById("imageSelector").value = "";
     document.getElementById('uploadImage').style.border = '';
     document.getElementById('uploadImage').title = "Upload custom image";
-    console.log("🗑️ Image cleared from bubble");
+    console.log("🗑️ Image cleared from bubble, color set to:", selectedIdea.color);
   }
 }
 
@@ -885,6 +929,219 @@ function testImageUpload() {
       console.log("🔄 Reloaded image for bubble");
     };
     img.src = selectedIdea.image;
+  }
+}
+
+// Test function to manually trigger effects
+function testEffects() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  
+  console.log("🧪 Testing effects for bubble:", selectedIdea.title);
+  console.log("🧪 Current effects:", {
+    glow: selectedIdea.glow,
+    flash: selectedIdea.flash,
+    animateColors: selectedIdea.animateColors,
+    transparent: selectedIdea.transparent
+  });
+  
+  // Toggle all effects for testing
+  selectedIdea.glow = !selectedIdea.glow;
+  selectedIdea.flash = !selectedIdea.flash;
+  selectedIdea.animateColors = !selectedIdea.animateColors;
+  selectedIdea.transparent = !selectedIdea.transparent;
+  
+  console.log("🧪 Effects toggled to:", {
+    glow: selectedIdea.glow,
+    flash: selectedIdea.flash,
+    animateColors: selectedIdea.animateColors,
+    transparent: selectedIdea.transparent
+  });
+}
+
+// Individual effect toggle functions
+function toggleGlow() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  selectedIdea.glow = !selectedIdea.glow;
+  console.log("✨ Glow:", selectedIdea.glow ? "ON" : "OFF");
+  
+  // Update button appearance
+  const button = event.target;
+  if (selectedIdea.glow) {
+    button.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+    button.style.color = "black";
+  } else {
+    button.style.background = "";
+    button.style.color = "";
+  }
+}
+
+function toggleFlash() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  selectedIdea.flash = !selectedIdea.flash;
+  console.log("⚡ Flash:", selectedIdea.flash ? "ON" : "OFF");
+  
+  // Update button appearance
+  const button = event.target;
+  if (selectedIdea.flash) {
+    button.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+    button.style.color = "black";
+  } else {
+    button.style.background = "";
+    button.style.color = "";
+  }
+}
+
+function toggleAnimateColors() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  selectedIdea.animateColors = !selectedIdea.animateColors;
+  console.log("🎨 Animate Colors:", selectedIdea.animateColors ? "ON" : "OFF");
+  
+  // Update button appearance
+  const button = event.target;
+  if (selectedIdea.animateColors) {
+    button.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+    button.style.color = "black";
+  } else {
+    button.style.background = "";
+    button.style.color = "";
+  }
+}
+
+function toggleTransparent() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  selectedIdea.transparent = !selectedIdea.transparent;
+  console.log("👻 Transparent:", selectedIdea.transparent ? "ON" : "OFF");
+  
+  // Update button appearance
+  const button = event.target;
+  if (selectedIdea.transparent) {
+    button.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+    button.style.color = "black";
+  } else {
+    button.style.background = "";
+    button.style.color = "";
+  }
+}
+
+function changeGlowColor() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  
+  // Generate a random glow color
+  const glowColor = randomColor();
+  selectedIdea.glowColor = glowColor;
+  
+  console.log("🌈 Glow color changed to:", glowColor);
+  
+  // Show visual feedback on the button
+  const button = event.target;
+  button.style.background = `linear-gradient(45deg, ${glowColor}, ${glowColor}80)`;
+  button.style.color = "white";
+  
+  // Reset button appearance after 1 second
+  setTimeout(() => {
+    button.style.background = "";
+    button.style.color = "";
+  }, 1000);
+}
+
+function toggleFixed() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  selectedIdea.fixed = !selectedIdea.fixed;
+  console.log("🛑 Fixed:", selectedIdea.fixed ? "ON" : "OFF");
+  
+  // Update button appearance
+  const button = event.target;
+  if (selectedIdea.fixed) {
+    button.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+    button.style.color = "black";
+  } else {
+    button.style.background = "";
+    button.style.color = "";
+  }
+}
+
+function toggleStatic() {
+  if (!selectedIdea) {
+    alert("Please select a bubble first");
+    return;
+  }
+  selectedIdea.static = !selectedIdea.static;
+  console.log("🛑 Static:", selectedIdea.static ? "ON" : "OFF");
+  
+  // Update button appearance
+  const button = event.target;
+  if (selectedIdea.static) {
+    button.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+    button.style.color = "black";
+  } else {
+    button.style.background = "";
+    button.style.color = "";
+  }
+}
+
+// Panel management
+let panelSide = 'left'; // 'left' or 'right'
+let panelFadeTimeout = null;
+
+function togglePanelSide() {
+  const panel = document.getElementById('panel');
+  if (panelSide === 'left') {
+    panel.style.left = 'auto';
+    panel.style.right = '15px';
+    panelSide = 'right';
+    console.log("🎭 Panel moved to right side");
+  } else {
+    panel.style.right = 'auto';
+    panel.style.left = '15px';
+    panelSide = 'left';
+    console.log("🎭 Panel moved to left side");
+  }
+}
+
+function resetPanelFade() {
+  const panel = document.getElementById('panel');
+  if (panel && panel.style.display === 'block') {
+    // Clear existing timeout
+    if (panelFadeTimeout) {
+      clearTimeout(panelFadeTimeout);
+    }
+    
+    // Set new timeout for 15 seconds
+    panelFadeTimeout = setTimeout(() => {
+      panel.style.opacity = '0';
+      setTimeout(() => {
+        panel.style.display = 'none';
+        panel.style.opacity = '1';
+      }, 500); // Fade out over 0.5 seconds
+    }, 15000);
+  }
+}
+
+// Reset panel fade timer on any panel interaction
+function resetPanelTimer() {
+  if (panel.style.display === 'block') {
+    resetPanelFade();
   }
 }
 
@@ -922,15 +1179,19 @@ function testImageUpload() {
     const a = ideas[i];
     const actualSpeed = movementDelayActive ? 0 : speedMultiplier;
 
-    // Movement
-    a.x += a.vx * actualSpeed;
-    a.y += a.vy * actualSpeed;
+    // Movement - fixed and static bubbles don't move automatically
+    if (!a.fixed && !a.static) {
+      a.x += a.vx * actualSpeed;
+      a.y += a.vy * actualSpeed;
+    }
 
-    // Boundary bounce
-    if (a.x - a.radius < border) { a.x = border + a.radius; a.vx *= -1; }
-    if (a.x + a.radius > width - border) { a.x = width - border - a.radius; a.vx *= -1; }
-    if (a.y - a.radius < border + 50) { a.y = border + 50 + a.radius; a.vy *= -1; }
-    if (a.y + a.radius > height - border) { a.y = height - border - a.radius; a.vy *= -1; }
+    // Boundary bounce - static bubbles don't bounce off boundaries
+    if (!a.static) {
+      if (a.x - a.radius < border) { a.x = border + a.radius; a.vx *= -1; }
+      if (a.x + a.radius > width - border) { a.x = width - border - a.radius; a.vx *= -1; }
+      if (a.y - a.radius < border + 50) { a.y = border + 50 + a.radius; a.vy *= -1; }
+      if (a.y + a.radius > height - border) { a.y = height - border - a.radius; a.vy *= -1; }
+    }
 
     // Collision detection
     for (let j = i + 1; j < ideas.length; j++) {
@@ -941,12 +1202,35 @@ function testImageUpload() {
 
       if (dist < a.radius + b.radius) {
         const angle = Math.atan2(dy, dx);
-        const tx = a.x - Math.cos(angle) * (a.radius + b.radius);
-        const ty = a.y - Math.sin(angle) * (a.radius + b.radius);
-        b.x = tx;
-        b.y = ty;
-        [a.vx, b.vx] = [b.vx, a.vx];
-        [a.vy, b.vy] = [b.vy, a.vy];
+        
+        // Handle different collision types
+        if (a.static && !b.static) {
+          // A is static (wall), B bounces off
+          const tx = a.x - Math.cos(angle) * (a.radius + b.radius);
+          const ty = a.y - Math.sin(angle) * (a.radius + b.radius);
+          b.x = tx;
+          b.y = ty;
+          // Reverse B's velocity
+          b.vx *= -1;
+          b.vy *= -1;
+        } else if (!a.static && b.static) {
+          // B is static (wall), A bounces off
+          const tx = b.x + Math.cos(angle) * (a.radius + b.radius);
+          const ty = b.y + Math.sin(angle) * (a.radius + b.radius);
+          a.x = tx;
+          a.y = ty;
+          // Reverse A's velocity
+          a.vx *= -1;
+          a.vy *= -1;
+        } else {
+          // Normal collision (both moving or both fixed)
+          const tx = a.x - Math.cos(angle) * (a.radius + b.radius);
+          const ty = a.y - Math.sin(angle) * (a.radius + b.radius);
+          b.x = tx;
+          b.y = ty;
+          [a.vx, b.vx] = [b.vx, a.vx];
+          [a.vy, b.vy] = [b.vy, a.vy];
+        }
       }
     }
 
@@ -998,51 +1282,77 @@ function testImageUpload() {
         ctx.fill();
       }
     } else {
-      ctx.fillStyle = a.animateColors
-        ? `hsl(${(Date.now() * 0.08) % 360}, 100%, 70%)`
-        : a.transparent
-          ? "rgba(255,255,255,0.1)"
-          : gradient;
+      // Handle different fill styles based on effects
+      if (a.transparent) {
+        ctx.fillStyle = "rgba(255,255,255,0.1)";
+        console.log("👻 Drawing transparent bubble:", a.title);
+      } else if (a.animateColors) {
+        ctx.fillStyle = `hsl(${(Date.now() * 0.08) % 360}, 100%, 70%)`;
+        console.log("🎨 Drawing animated color bubble:", a.title);
+      } else {
+        // Use the bubble's color or gradient
+        ctx.fillStyle = a.color || gradient;
+      }
 
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = a.color;
+      // Apply shadow effects
+      if (a.glow) {
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = a.color || "white";
+        console.log("✨ Drawing glow effect for bubble:", a.title);
+      } else {
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = a.color || "white";
+      }
+      
       ctx.fill();
     }
 
     ctx.restore();
 
-    // Glow or flash (drawn after image so it's visible)
+    // Glow and flash effects (drawn after main bubble so they're visible)
     if (a.glow || a.flash) {
       ctx.save();
       ctx.translate(a.x, a.y);
       if (a.rotation) {
         ctx.rotate((a.rotation * Math.PI) / 180);
       }
-      ctx.shadowColor = "white";
-      ctx.shadowBlur = a.glow ? 20 : 0;
-      if (a.flash) ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() / 100);
-      ctx.beginPath();
-      ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.restore();
-    }
-    
-    // Additional glow effect for better visibility
-    if (a.glow) {
-      ctx.save();
-      ctx.translate(a.x, a.y);
-      if (a.rotation) {
-        ctx.rotate((a.rotation * Math.PI) / 180);
+      
+      // Flash effect
+      if (a.flash) {
+        ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() / 100);
+        ctx.beginPath();
+        ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        console.log("⚡ Drawing flash effect for bubble:", a.title);
       }
-      ctx.shadowColor = "white";
-      ctx.shadowBlur = 15;
-      ctx.beginPath();
-      ctx.arc(0, 0, a.radius + 2, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      
+      // Glow effect
+      if (a.glow) {
+        // Use custom glow color if available, otherwise use bubble color
+        const glowColor = a.glowColor || a.color || "white";
+        
+        ctx.globalAlpha = 0.8;
+        ctx.shadowColor = glowColor;
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.arc(0, 0, a.radius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = glowColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Additional outer glow
+        ctx.globalAlpha = 0.4;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(0, 0, a.radius + 5, 0, Math.PI * 2);
+        ctx.strokeStyle = glowColor;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        console.log("✨ Drawing glow effect for bubble:", a.title, "with color:", glowColor);
+      }
+      
       ctx.restore();
     }
 
@@ -1279,6 +1589,14 @@ let isDragging = false;
         selectedIdea.image = value;
         console.log("🖼️ Selected from dropdown:", value || "none");
         console.log("🖼️ Bubble title:", selectedIdea.title);
+        
+        // If "None" is selected, ensure bubble has a random color
+        if (!value || value === "") {
+          if (!selectedIdea.color || selectedIdea.color === "black") {
+            selectedIdea.color = randomColor();
+            console.log("🎨 Reset color to:", selectedIdea.color);
+          }
+        }
         
         // Preload the image if it's not already loaded
         if (value && !loadedImages[value]) {
@@ -3114,24 +3432,7 @@ function applyToBubble(bubble) {
 }
 
 
-document.getElementById('toggleGlow').addEventListener('change', (e) => {
-  if (selectedIdea) {
-    selectedIdea.glow = e.target.checked;
-    console.log("✨ Glow:", e.target.checked ? "ON" : "OFF");
-  }
-});
-document.getElementById('toggleFlash').addEventListener('change', (e) => {
-  if (selectedIdea) {
-    selectedIdea.flash = e.target.checked;
-    console.log("⚡ Flash:", e.target.checked ? "ON" : "OFF");
-  }
-});
-document.getElementById('toggleAnimateColors').addEventListener('change', (e) => {
-  if (selectedIdea) selectedIdea.animateColors = e.target.checked;
-});
-document.getElementById('toggleTransparent').addEventListener('change', (e) => {
-  if (selectedIdea) selectedIdea.transparent = e.target.checked;
-});
+// Event listeners will be set up in DOMContentLoaded
 
 
 
@@ -3142,6 +3443,7 @@ let lastChangedDropdown = null;
 document.addEventListener('DOMContentLoaded', function() {
   console.log("🔄 DOMContentLoaded fired, setting up event listeners");
   
+  // Set up image selector
   const imageSelector = document.getElementById('imageSelector');
   console.log("🖼️ imageSelector found:", !!imageSelector);
   if (imageSelector) {
@@ -3152,6 +3454,14 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedIdea.image = value;
         console.log("🖼️ Selected from dropdown:", value || "none");
         console.log("🖼️ Bubble title:", selectedIdea.title);
+        
+        // If "None" is selected, ensure bubble has a random color
+        if (!value || value === "") {
+          if (!selectedIdea.color || selectedIdea.color === "black") {
+            selectedIdea.color = randomColor();
+            console.log("🎨 Reset color to:", selectedIdea.color);
+          }
+        }
         
         // Preload the image if it's not already loaded
         if (value && !loadedImages[value]) {
@@ -3178,6 +3488,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("❌ No selectedIdea when dropdown changed");
       }
     });
+  }
+  
+  // Effect toggle listeners are now handled by button onclick functions
+  
+  // Add panel interaction listeners to reset fade timer
+  const panel = document.getElementById('panel');
+  if (panel) {
+    panel.addEventListener('mousemove', resetPanelTimer);
+    panel.addEventListener('click', resetPanelTimer);
+    panel.addEventListener('input', resetPanelTimer);
+    panel.addEventListener('change', resetPanelTimer);
   }
    
 });
